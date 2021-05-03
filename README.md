@@ -1,29 +1,27 @@
-# README #
+# react-native-adyen-dropin
 
-This README would normally document whatever steps are necessary to get your application up and running.
+React Native bridge for Adyen drop-in
 
-### What is this repository for? ###
+## Installation
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+```sh
+npm install react-native-adyen-dropin
+```
 
-### How do I get set up? ###
+## Usage
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
+```js
+import AdyenDropin from "react-native-adyen-dropin";
 
-### Contribution guidelines ###
+// ...
 
-* Writing tests
-* Code review
-* Other guidelines
+const result = await AdyenDropin.multiply(3, 7);
+```
 
-### Who do I talk to? ###
+## Contributing
 
-* Repo owner or admin
-* Other community or team contact
+See the [contributing guide](CONTRIBUTING.md) to learn how to contribute to the repository and the development workflow.
+
+## License
+
+MIT
