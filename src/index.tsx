@@ -3,6 +3,7 @@ import { requireNativeComponent, ViewStyle } from 'react-native';
 
 type AdyenDropinProps = {
   visible?: boolean;
+  environment?: 'test' | 'live';
   paymentMethods?: any;
   paymentMethodsConfiguration?: any;
   style?: ViewStyle;
@@ -15,9 +16,10 @@ export const AdyenDropinViewManager = requireNativeComponent<AdyenDropinProps>(
 const AdyenDropIn = React.forwardRef(
   (
     {
-      visible,
-      paymentMethods,
-      paymentMethodsConfiguration,
+      visible = false,
+      environment = 'test',
+      paymentMethods = {},
+      paymentMethodsConfiguration = {},
       style,
     }: AdyenDropinProps,
     ref
@@ -28,6 +30,7 @@ const AdyenDropIn = React.forwardRef(
       <AdyenDropinViewManager
         ref={forwardedRef}
         visible={visible}
+        environment={environment}
         paymentMethods={paymentMethods}
         paymentMethodsConfiguration={paymentMethodsConfiguration}
         style={style}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Platform } from 'react-native';
+import { Platform, Button } from 'react-native';
 
 import { StyleSheet, View } from 'react-native';
 import AdyenDropinViewManager from 'react-native-adyen-dropin';
@@ -8,7 +8,6 @@ import config from '../config';
 export default function App() {
   const [visible, setVisible] = useState(false);
   const [paymentMethods, setPaymentMethods] = useState(null);
-  const [paymentMethodsConfiguration] = useState(config);
 
   useEffect(() => {
     async function init() {
@@ -30,19 +29,15 @@ export default function App() {
     init();
   }, []);
 
-  useEffect(() => {
-    if (paymentMethods) {
-      setVisible(true);
-    }
-  }, [paymentMethods]);
-
   return (
     <View style={styles.container}>
       <AdyenDropinViewManager
         visible={visible}
+        environment={config.environment}
         paymentMethods={paymentMethods}
-        paymentMethodsConfiguration={paymentMethodsConfiguration}
+        paymentMethodsConfiguration={{ clientKey: config.clientKey }}
       />
+      <Button title="Start payment" onPress={() => setVisible(true)} />
     </View>
   );
 }

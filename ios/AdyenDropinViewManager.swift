@@ -32,6 +32,8 @@ class AdyenDropinView: UIView, DropInComponentDelegate {
   
   private var _paymentMethodsConfiguration: DropInComponent.PaymentMethodsConfiguration?
   
+  private var _environment: Environment? = Environment.test
+  
   private var _invalidating: Bool = false
   
   @objc var visible: Bool = false {
@@ -68,6 +70,28 @@ class AdyenDropinView: UIView, DropInComponentDelegate {
       
       if let clientKey = paymentMethodsConfiguration!.value(forKey: "clientKey") as? String {
         self._paymentMethodsConfiguration = DropInComponent.PaymentMethodsConfiguration(clientKey: clientKey)
+        
+        if (self._environment != nil) {
+          self._paymentMethodsConfiguration?.environment = self._environment!
+        }
+      }
+    }
+  }
+  
+  @objc var environment: String? {
+    didSet {
+      switch environment {
+        case "test":
+          self._environment = Environment.test
+        case "live":
+          self._environment = Environment.live
+        default:
+          self._environment = Environment.test
+      }
+      
+      if (self._paymentMethodsConfiguration != nil) {
+        self._paymentMethodsConfiguration!.environment = self._environment!
+        self.initDropIn()
       }
     }
   }
@@ -94,6 +118,16 @@ class AdyenDropinView: UIView, DropInComponentDelegate {
     self.reactViewController()?.dismiss(animated: false, completion: nil)
   }
   
+  func initDropIn() {
+    if (self._paymentMethods != nil && self._paymentMethodsConfiguration != nil) {
+      print("Initializing drop-in")
+      self._dropInComponent = DropInComponent(paymentMethods: _paymentMethods!, paymentMethodsConfiguration: _paymentMethodsConfiguration!)
+      self._dropInComponent?.delegate = self
+    } else {
+      print("Skipped init because either paymentMethods or paymentMethodsConfiguration was not set")
+    }
+  }
+  
   func open() {
     print("Open was called")
     
@@ -107,12 +141,7 @@ class AdyenDropinView: UIView, DropInComponentDelegate {
       return
     }
     
-    if (self._paymentMethods != nil && self._paymentMethodsConfiguration != nil) {
-      self._dropInComponent = DropInComponent(paymentMethods: _paymentMethods!, paymentMethodsConfiguration: _paymentMethodsConfiguration!)
-      self._dropInComponent?.delegate = self
-    } else {
-      print("Skipped init because either paymentMethods or paymentMethodsConfiguration was not set")
-    }
+    self.initDropIn()
 
     if (self._dropInComponent != nil) {
       self.reactViewController()?.present(self._dropInComponent!.viewController, animated: true, completion: nil)
