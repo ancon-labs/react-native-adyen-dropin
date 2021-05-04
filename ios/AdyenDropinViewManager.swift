@@ -25,8 +25,7 @@ class AdyenDropinViewManager: RCTViewManager, RCTInvalidating {
 }
 
 @objc(AdyenDropinView)
-class AdyenDropinView: UIView {
-  
+class AdyenDropinView: UIView, DropInComponentDelegate {
   private var _dropInComponent: DropInComponent?
 
   private var _paymentMethods: PaymentMethods?
@@ -73,10 +72,14 @@ class AdyenDropinView: UIView {
     }
   }
   
+  func isDropInVisible() -> Bool {
+    return self.reactViewController()?.presentedViewController != nil && self.reactViewController()?.presentedViewController == self._dropInComponent?.viewController
+  }
+  
   func invalidate() {
     self._invalidating = true
     
-    if (self._dropInComponent != nil) {
+    if (self.isDropInVisible()) {
       self._dropInComponent!.viewController.dismiss(animated: true) {
         self._dropInComponent = nil
         self._paymentMethods = nil
@@ -99,13 +102,14 @@ class AdyenDropinView: UIView {
       return
     }
     
-    guard !(self._dropInComponent?.viewController.isBeingPresented ?? false) else {
+    guard !(self.isDropInVisible()) else {
       print("Skipping open because viewController is already presenting")
       return
     }
     
     if (self._paymentMethods != nil && self._paymentMethodsConfiguration != nil) {
       self._dropInComponent = DropInComponent(paymentMethods: _paymentMethods!, paymentMethodsConfiguration: _paymentMethodsConfiguration!)
+      self._dropInComponent?.delegate = self
     } else {
       print("Skipped init because either paymentMethods or paymentMethodsConfiguration was not set")
     }
@@ -123,7 +127,7 @@ class AdyenDropinView: UIView {
       return
     }
     
-    guard (self._dropInComponent?.viewController.isBeingPresented ?? false) else {
+    guard (self.isDropInVisible()) else {
       print("Skipping close because viewController is not being presented")
       return
     }
@@ -133,5 +137,26 @@ class AdyenDropinView: UIView {
       self._paymentMethods = nil
       self._paymentMethodsConfiguration = nil
     }
+  }
+  
+  func didSubmit(_ data: PaymentComponentData, for paymentMethod: PaymentMethod, from component: DropInComponent) {
+    print("didSubmit")
+  }
+  
+  func didProvide(_ data: ActionComponentData, from component: DropInComponent) {
+    print("didProvide")
+  }
+  
+  func didComplete(from component: DropInComponent) {
+    print("didComplete")
+  }
+  
+  func didFail(with error: Error, from component: DropInComponent) {
+    print("didFail")
+    self.close()
+  }
+  
+  func didCancel(component: PaymentComponent, from dropInComponent: DropInComponent) {
+    print("didCancel")
   }
 }
