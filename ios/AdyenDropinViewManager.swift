@@ -1,32 +1,137 @@
-@objc(AdyenDropinViewManager)
-class AdyenDropinViewManager: RCTViewManager {
+import Adyen
 
+@objc(AdyenDropinViewManager)
+class AdyenDropinViewManager: RCTViewManager, RCTInvalidating {
+    
+  private var viewInstance: AdyenDropinView?
+  
+  func invalidate() {
+    print("Invalidating")
+    if (self.viewInstance != nil) {
+      DispatchQueue.main.async {
+        self.viewInstance?.invalidate()
+      }
+    }
+  }
+  
   override func view() -> (AdyenDropinView) {
-    return AdyenDropinView()
+    self.viewInstance = AdyenDropinView()
+    return self.viewInstance!
+  }
+  
+  override class func requiresMainQueueSetup() -> Bool {
+    return true
   }
 }
 
-class AdyenDropinView : UIView {
+@objc(AdyenDropinView)
+class AdyenDropinView: UIView {
+  
+  private var _dropInComponent: DropInComponent?
 
-  @objc var color: String = "" {
+  private var _paymentMethods: PaymentMethods?
+  
+  private var _paymentMethodsConfiguration: DropInComponent.PaymentMethodsConfiguration?
+  
+  private var _invalidating: Bool = false
+  
+  @objc var visible: Bool = false {
     didSet {
-      self.backgroundColor = hexStringToUIColor(hexColor: color)
+      if (visible) {
+        self.open()
+      } else {
+        self.close()
+      }
     }
   }
+  
+  @objc var paymentMethods: NSDictionary? {
+    didSet {
+      do {
+        guard paymentMethods != nil else {
+          return
+        }
 
-  func hexStringToUIColor(hexColor: String) -> UIColor {
-    let stringScanner = Scanner(string: hexColor)
-
-    if(hexColor.hasPrefix("#")) {
-      stringScanner.scanLocation = 1
+        let JSON = try JSONSerialization.data(withJSONObject: paymentMethods!)
+        self._paymentMethods = try Coder.decode(JSON) as PaymentMethods
+      } catch let err {
+        print("Failed to decode paymentMethods")
+        print(err)
+      }
     }
-    var color: UInt32 = 0
-    stringScanner.scanHexInt32(&color)
+  }
+  
+  @objc var paymentMethodsConfiguration: NSDictionary? {
+    didSet {
+      guard paymentMethodsConfiguration != nil else {
+        return
+      }
+      
+      if let clientKey = paymentMethodsConfiguration!.value(forKey: "clientKey") as? String {
+        self._paymentMethodsConfiguration = DropInComponent.PaymentMethodsConfiguration(clientKey: clientKey)
+      }
+    }
+  }
+  
+  func invalidate() {
+    self._invalidating = true
+    
+    if (self._dropInComponent != nil) {
+      self._dropInComponent!.viewController.dismiss(animated: true) {
+        self._dropInComponent = nil
+        self._paymentMethods = nil
+        self._paymentMethodsConfiguration = nil
+      }
+    } else {
+      self._dropInComponent = nil
+      self._paymentMethods = nil
+      self._paymentMethodsConfiguration = nil
+    }
+    
+    self.reactViewController()?.dismiss(animated: false, completion: nil)
+  }
+  
+  func open() {
+    print("Open was called")
+    
+    guard !self._invalidating else {
+      print("Skipping open because invalidating")
+      return
+    }
+    
+    guard !(self._dropInComponent?.viewController.isBeingPresented ?? false) else {
+      print("Skipping open because viewController is already presenting")
+      return
+    }
+    
+    if (self._paymentMethods != nil && self._paymentMethodsConfiguration != nil) {
+      self._dropInComponent = DropInComponent(paymentMethods: _paymentMethods!, paymentMethodsConfiguration: _paymentMethodsConfiguration!)
+    } else {
+      print("Skipped init because either paymentMethods or paymentMethodsConfiguration was not set")
+    }
 
-    let r = CGFloat(Int(color >> 16) & 0x000000FF)
-    let g = CGFloat(Int(color >> 8) & 0x000000FF)
-    let b = CGFloat(Int(color) & 0x000000FF)
-
-    return UIColor(red: r / 255.0, green: g / 255.0, blue: b / 255.0, alpha: 1)
+    if (self._dropInComponent != nil) {
+      self.reactViewController()?.present(self._dropInComponent!.viewController, animated: true, completion: nil)
+    }
+  }
+  
+  func close() {
+    print("Close was called")
+    
+    guard !self._invalidating else {
+      print("Skipping close because invalidating")
+      return
+    }
+    
+    guard (self._dropInComponent?.viewController.isBeingPresented ?? false) else {
+      print("Skipping close because viewController is not being presented")
+      return
+    }
+    
+    self._dropInComponent!.viewController.dismiss(animated: true) {
+      self._dropInComponent = nil
+      self._paymentMethods = nil
+      self._paymentMethodsConfiguration = nil
+    }
   }
 }
