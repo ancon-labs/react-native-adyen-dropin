@@ -1,38 +1,56 @@
 import React from 'react';
 import { requireNativeComponent, ViewStyle } from 'react-native';
 
-type AdyenDropinProps = {
+type AdyenDropInProps = {
   visible?: boolean;
-  environment?: 'test' | 'live';
   paymentMethods?: any;
   paymentMethodsConfiguration?: any;
+  onSubmit?: Function;
+  onAdditionalDetails?: Function;
+  onError?: Function;
   style?: ViewStyle;
 };
 
-export const AdyenDropinViewManager = requireNativeComponent<AdyenDropinProps>(
-  'AdyenDropinView'
+export const AdyenDropInModule = requireNativeComponent<AdyenDropInProps>(
+  'AdyenDropIn'
 );
 
 const AdyenDropIn = React.forwardRef(
   (
     {
       visible = false,
-      environment = 'test',
       paymentMethods = {},
       paymentMethodsConfiguration = {},
+      onSubmit,
+      onAdditionalDetails,
+      onError,
       style,
-    }: AdyenDropinProps,
+    }: AdyenDropInProps,
     ref
   ) => {
     const forwardedRef = ref as React.RefObject<any>;
 
+    function handleSubmit(event: any) {
+      onSubmit?.(event.nativeEvent);
+    }
+
+    function handleError(event: any) {
+      onError?.(event.nativeEvent);
+    }
+
+    function handleAdditionalDetails(event: any) {
+      onAdditionalDetails?.(event.nativeEvent);
+    }
+
     return (
-      <AdyenDropinViewManager
+      <AdyenDropInModule
         ref={forwardedRef}
         visible={visible}
-        environment={environment}
         paymentMethods={paymentMethods}
         paymentMethodsConfiguration={paymentMethodsConfiguration}
+        onSubmit={handleSubmit}
+        onAdditionalDetails={handleAdditionalDetails}
+        onError={handleError}
         style={style}
       />
     );

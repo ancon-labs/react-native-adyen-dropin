@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Platform, Button } from 'react-native';
 
 import { StyleSheet, View } from 'react-native';
-import AdyenDropinViewManager from 'react-native-adyen-dropin';
+import AdyenDropIn from 'react-native-adyen-dropin';
 import config from '../config';
 
 export default function App() {
@@ -31,11 +31,25 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      <AdyenDropinViewManager
+      <AdyenDropIn
         visible={visible}
-        environment={config.environment}
         paymentMethods={paymentMethods}
-        paymentMethodsConfiguration={{ clientKey: config.clientKey }}
+        paymentMethodsConfiguration={{
+          clientKey: config.clientKey,
+          environment: config.environment,
+          countryCode: config.countryCode,
+          applePay: {
+            configuration: {
+              merchantId: config.applePay?.configuration?.merchantId,
+            },
+          },
+          payment: { value: 100, currencyCode: 'SEK' },
+        }}
+        onSubmit={(...args: [any]) => console.log('handle submit', ...args)}
+        onAdditionalDetails={(...args: [any]) =>
+          console.log('handle details', ...args)
+        }
+        onError={(...args: [any]) => console.log('handle error', ...args)}
       />
       <Button title="Start payment" onPress={() => setVisible(true)} />
     </View>

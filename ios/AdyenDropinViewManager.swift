@@ -1,9 +1,10 @@
 import Adyen
+import PassKit
 
-@objc(AdyenDropinViewManager)
-class AdyenDropinViewManager: RCTViewManager, RCTInvalidating {
+@objc(AdyenDropInViewManager)
+class AdyenDropInViewManager: RCTViewManager, RCTInvalidating {
     
-  private var viewInstance: AdyenDropinView?
+  private var viewInstance: AdyenDropInView?
   
   func invalidate() {
     print("Invalidating")
@@ -14,8 +15,10 @@ class AdyenDropinViewManager: RCTViewManager, RCTInvalidating {
     }
   }
   
-  override func view() -> (AdyenDropinView) {
-    self.viewInstance = AdyenDropinView()
+  override func view() -> (AdyenDropInView) {
+    AdyenLogging.isEnabled = true
+    print(AdyenLogging.isEnabled)
+    self.viewInstance = AdyenDropInView()
     return self.viewInstance!
   }
   
@@ -24,15 +27,13 @@ class AdyenDropinViewManager: RCTViewManager, RCTInvalidating {
   }
 }
 
-@objc(AdyenDropinView)
-class AdyenDropinView: UIView, DropInComponentDelegate {
+@objc(AdyenDropInView)
+class AdyenDropInView: UIView {
   private var _dropInComponent: DropInComponent?
 
   private var _paymentMethods: PaymentMethods?
   
   private var _paymentMethodsConfiguration: DropInComponent.PaymentMethodsConfiguration?
-  
-  private var _environment: Environment? = Environment.test
   
   private var _invalidating: Bool = false
   
@@ -68,33 +69,17 @@ class AdyenDropinView: UIView, DropInComponentDelegate {
         return
       }
       
-      if let clientKey = paymentMethodsConfiguration!.value(forKey: "clientKey") as? String {
-        self._paymentMethodsConfiguration = DropInComponent.PaymentMethodsConfiguration(clientKey: clientKey)
-        
-        if (self._environment != nil) {
-          self._paymentMethodsConfiguration?.environment = self._environment!
-        }
+      if let clientKey = paymentMethodsConfiguration?.value(forKey: "clientKey") as? String {
+        let parser = ConfigurationParser(clientKey)
+        self._paymentMethodsConfiguration = parser.parse(paymentMethodsConfiguration!)
       }
     }
   }
   
-  @objc var environment: String? {
-    didSet {
-      switch environment {
-        case "test":
-          self._environment = Environment.test
-        case "live":
-          self._environment = Environment.live
-        default:
-          self._environment = Environment.test
-      }
-      
-      if (self._paymentMethodsConfiguration != nil) {
-        self._paymentMethodsConfiguration!.environment = self._environment!
-        self.initDropIn()
-      }
-    }
-  }
+  // Events
+  @objc var onSubmit: RCTDirectEventBlock?
+  @objc var onAdditionalDetails: RCTDirectEventBlock?
+  @objc var onError: RCTDirectEventBlock?
   
   func isDropInVisible() -> Bool {
     return self.reactViewController()?.presentedViewController != nil && self.reactViewController()?.presentedViewController == self._dropInComponent?.viewController
@@ -168,12 +153,33 @@ class AdyenDropinView: UIView, DropInComponentDelegate {
     }
   }
   
+  internal func finish(with resultCode: PaymentResultCode) {
+    let success = resultCode == .authorised || resultCode == .received || resultCode == .pending
+    print(success)
+  }
+
+  internal func finish(with error: Error) {
+    let isCancelled = (error as? ComponentError) == .cancelled
+    print(isCancelled)
+  }
+}
+
+extension AdyenDropInView: DropInComponentDelegate {
   func didSubmit(_ data: PaymentComponentData, for paymentMethod: PaymentMethod, from component: DropInComponent) {
-    print("didSubmit")
+    self.onSubmit?([
+      "paymentMethod": data.paymentMethod.encodable.dictionary as Any,
+      "storePaymentMethod": data.storePaymentMethod,
+      "browserInfo": data.browserInfo as Any,
+      "channel": "iOS"
+    ])
   }
   
   func didProvide(_ data: ActionComponentData, from component: DropInComponent) {
     print("didProvide")
+    self.onAdditionalDetails?([
+      "details": data.details.dictionary as Any,
+      "paymentData": data.paymentData?.dictionary as Any
+    ])
   }
   
   func didComplete(from component: DropInComponent) {
@@ -182,10 +188,18 @@ class AdyenDropinView: UIView, DropInComponentDelegate {
   
   func didFail(with error: Error, from component: DropInComponent) {
     print("didFail")
+    self.onError?(["error": error.localizedDescription])
     self.close()
   }
   
   func didCancel(component: PaymentComponent, from dropInComponent: DropInComponent) {
     print("didCancel")
+  }
+}
+
+extension Encodable {
+  var dictionary: [String: Any]? {
+    guard let data = try? JSONEncoder().encode(self) else { return nil }
+    return (try? JSONSerialization.jsonObject(with: data, options: .allowFragments)).flatMap { $0 as? [String: Any] }
   }
 }
