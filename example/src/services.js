@@ -1,24 +1,34 @@
-export const httpPost = async (url, data) =>
-  fetch(url, {
+export const httpPost = async (url, data) => {
+  const response = await fetch(url, {
     method: 'POST',
     headers: {
       'Accept': 'application/json, text/plain, */*',
       'Content-Type': 'application/json',
+      'Authorization': '',
     },
-    body: JSON.stringify(data),
-  }).then((response) => {
-    if (response.ok) {
-      return response.json();
-    }
-
-    throw new Error(response.json());
+    body: JSON.stringify(data) ?? '{}',
   });
 
-export const getPaymentMethods = (configuration) =>
-  httpPost('http://192.168.0.12:3000/api/paymentMethods', configuration);
+  const responseData = await response.json();
 
-export const makePayment = (data) =>
-  httpPost('http://192.168.0.12:3000/api/payments', data);
+  if (response.ok) {
+    if (responseData.refusalReasonCode != null) {
+      throw responseData;
+    }
 
-export const makeDetailsCall = (data) =>
-  httpPost('http://192.168.0.12:3000/api/payments/details', data);
+    return responseData;
+  }
+
+  throw responseData;
+};
+
+const BASE_URL = 'http://192.168.0.12:3000/api';
+
+export const getPaymentMethods = async (configuration) =>
+  httpPost(`${BASE_URL}/paymentMethods`, configuration);
+
+export const makePayment = async (data) =>
+  httpPost(`${BASE_URL}/payments`, data);
+
+export const makeDetailsCall = async (data) =>
+  httpPost(`${BASE_URL}/details`, data);

@@ -20,8 +20,12 @@ export default function App() {
 
   useEffect(() => {
     async function init() {
-      const response = await services.getPaymentMethods();
-      setPaymentMethods(response);
+      try {
+        const response = await services.getPaymentMethods();
+        setPaymentMethods(response);
+      } catch (err) {
+        setError(err);
+      }
     }
 
     init();
