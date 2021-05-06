@@ -4,7 +4,9 @@ import { Alert, Button } from 'react-native';
 import { StyleSheet, View } from 'react-native';
 import AdyenDropIn from 'react-native-adyen-dropin';
 
-const config = __DEV__ ? require('../config') : require('../config.example');
+const { default: config } = __DEV__
+  ? require('../config')
+  : require('../config.example');
 
 // @ts-ignore
 import * as services from './services';
@@ -14,6 +16,7 @@ export default function App() {
   const [paymentMethods, setPaymentMethods] = useState(null);
   const [paymentResponse, setPaymentResponse] = useState(null);
   const [detailsResponse, setDetailsResponse] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     async function init() {
@@ -24,31 +27,51 @@ export default function App() {
     init();
   }, []);
 
+  useEffect(() => {
+    if (error) {
+      Alert.alert('Payment failure', JSON.stringify(error ?? {}, undefined, 2));
+    }
+  }, [error]);
+
   async function handleSubmit(data: any) {
-    console.log('running handleSubmit');
-    console.log(data);
-    const response = await services.makePayment(data);
-    console.log('handleSubmit response');
-    console.log(response);
-    setPaymentResponse(response);
+    try {
+      console.log('running handleSubmit');
+      console.log(data);
+      const response = await services.makePayment(data);
+      console.log('handleSubmit response');
+      console.log(response);
+      setPaymentResponse(response);
+    } catch (err) {
+      setVisible(false);
+      setError(err);
+    }
   }
 
   async function handleAdditionalDetails(data: any) {
-    console.log('running handleAdditionalDetails');
-    console.log(data);
-    const response = await services.makeDetailsCall(data);
-    console.log('handleAdditionalDetails response');
-    console.log(response);
-    setDetailsResponse(response);
+    try {
+      console.log('running handleAdditionalDetails');
+      console.log(data);
+      const response = await services.makeDetailsCall(data);
+      console.log('handleAdditionalDetails response');
+      console.log(response);
+      setDetailsResponse(response);
+    } catch (err) {
+      setVisible(false);
+      setError(err);
+    }
   }
 
-  function handleError(err: any) {
-    Alert.alert('Payment failure', JSON.stringify(err ?? {}, undefined, 2));
+  function handleError(data: any) {
+    setError(data);
   }
 
-  // function handleSuccess() {
-  //   Alert.alert('Payment success');
-  // }
+  function handleSuccess(data: any) {
+    Alert.alert('Payment success', JSON.stringify(data ?? {}, undefined, 2));
+  }
+
+  function handleClose() {
+    setVisible(false);
+  }
 
   return (
     <View style={styles.container}>
@@ -72,7 +95,8 @@ export default function App() {
         onSubmit={handleSubmit}
         onAdditionalDetails={handleAdditionalDetails}
         onError={handleError}
-        // onSuccess={handleSuccess}
+        onSuccess={handleSuccess}
+        onClose={handleClose}
       />
       <Button title="Start payment" onPress={() => setVisible(true)} />
     </View>

@@ -41,6 +41,8 @@ class AdyenDropInViewManager: RCTViewManager, RCTInvalidating {
   private var viewInstance: AdyenDropInView?
   
   func invalidate() {
+    print("Invalidating drop-in...")
+    print(self.viewInstance != nil)
     if (self.viewInstance != nil) {
       DispatchQueue.main.async {
         self.viewInstance?.invalidate()
@@ -50,7 +52,6 @@ class AdyenDropInViewManager: RCTViewManager, RCTInvalidating {
   
   override func view() -> (AdyenDropInView) {
     AdyenLogging.isEnabled = true
-    print(AdyenLogging.isEnabled)
     self.viewInstance = AdyenDropInView()
     return self.viewInstance!
   }
@@ -148,6 +149,8 @@ class AdyenDropInView: UIView {
   @objc var onSubmit: RCTDirectEventBlock?
   @objc var onAdditionalDetails: RCTDirectEventBlock?
   @objc var onError: RCTDirectEventBlock?
+  @objc var onSuccess: RCTDirectEventBlock?
+  @objc var onClose: RCTDirectEventBlock?
   
   func isDropInVisible() -> Bool {
     return self.reactViewController()?.presentedViewController != nil && self.reactViewController()?.presentedViewController == self._dropInComponent?.viewController
@@ -156,13 +159,15 @@ class AdyenDropInView: UIView {
   func invalidate() {
     self._invalidating = true
     
-    if (self.isDropInVisible()) {
+    if (self._dropInComponent?.viewController != nil) {
+      print("Drop-in was visible on invalidation - closing")
       self._dropInComponent!.viewController.dismiss(animated: true) {
         self._dropInComponent = nil
         self._paymentMethods = nil
         self._paymentMethodsConfiguration = nil
       }
     } else {
+      print("Drop-in was not visible on invalidation")
       self._dropInComponent = nil
       self._paymentMethods = nil
       self._paymentMethodsConfiguration = nil
@@ -215,25 +220,24 @@ class AdyenDropInView: UIView {
     }
     
     self._dropInComponent!.viewController.dismiss(animated: true) {
-      self._dropInComponent = nil
-      self._paymentMethods = nil
-      self._paymentMethodsConfiguration = nil
+      self.onClose?([:])
     }
   }
   
   func handle(_ result: PaymentResponse) {
+    let paymentResultCode = PaymentResultCode.init(rawValue: result.resultCode.rawValue.lowercased())
+    
     switch result.resultCode {
     case .authorised, .pending, .received, .challengeShopper, .identifyShopper, .presentToShopper, .redirectShopper:
       if let action = result.action {
           handle(action)
       } else {
-        let paymentResultCode = PaymentResultCode.init(rawValue: result.resultCode.rawValue.lowercased())
-        finish(with: paymentResultCode!)
+        finish(with: paymentResultCode)
       }
     
     case .cancelled, .error, .refused:
       // TODO: Handle failure/error
-      print("TODO: FAILURE")
+      finish(with: paymentResultCode)
     }
   }
   
@@ -241,10 +245,12 @@ class AdyenDropInView: UIView {
     _dropInComponent?.handle(action)
   }
   
-  internal func finish(with resultCode: PaymentResultCode) {
+  internal func finish(with resultCode: PaymentResultCode?) {
     let success = resultCode == .authorised || resultCode == .received || resultCode == .pending
-    self.close()
-    // TODO: Handle success
+    if (success) {
+      self.close()
+      self.onSuccess?(["resultCode": resultCode?.rawValue ?? ""])
+    }
   }
   
   internal func finish(with error: Error) {

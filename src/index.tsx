@@ -10,6 +10,8 @@ type AdyenDropInProps = {
   onSubmit?: Function;
   onAdditionalDetails?: Function;
   onError?: Function;
+  onSuccess?: Function;
+  onClose?: Function;
   style?: ViewStyle;
 };
 
@@ -28,6 +30,8 @@ const AdyenDropIn = React.forwardRef(
       onSubmit,
       onAdditionalDetails,
       onError,
+      onSuccess,
+      onClose,
       style,
     }: AdyenDropInProps,
     ref
@@ -46,6 +50,14 @@ const AdyenDropIn = React.forwardRef(
       onAdditionalDetails?.(event.nativeEvent);
     }
 
+    function handleSuccess(event: any) {
+      onSuccess?.(event.nativeEvent);
+    }
+
+    function handleClose(event: any) {
+      onClose?.(event.nativeEvent);
+    }
+
     return (
       <AdyenDropInModule
         ref={forwardedRef}
@@ -57,6 +69,8 @@ const AdyenDropIn = React.forwardRef(
         onSubmit={handleSubmit}
         onAdditionalDetails={handleAdditionalDetails}
         onError={handleError}
+        onSuccess={handleSuccess}
+        onClose={handleClose}
         style={style}
       />
     );
