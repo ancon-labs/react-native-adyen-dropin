@@ -244,7 +244,6 @@ class AdyenDropInView: UIView {
       }
     
     case .cancelled, .error, .refused:
-      // TODO: Handle failure/error
       finish(with: paymentResultCode)
     }
   }
@@ -287,7 +286,8 @@ extension AdyenDropInView: DropInComponentDelegate {
   }
   
   func didComplete(from component: DropInComponent) {
-    // TODO: Handle success
+    print("didComplete")
+    self.finish(with: .authorised)
   }
   
   func didFail(with error: Error, from component: DropInComponent) {
