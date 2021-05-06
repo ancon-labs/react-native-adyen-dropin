@@ -3,7 +3,8 @@ import { Alert, Button } from 'react-native';
 
 import { StyleSheet, View } from 'react-native';
 import AdyenDropIn from 'react-native-adyen-dropin';
-import config from '../config';
+
+const config = __DEV__ ? require('../config') : require('../config.example');
 
 // @ts-ignore
 import * as services from './services';
