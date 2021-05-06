@@ -63,15 +63,10 @@ class AdyenDropInViewManager: RCTViewManager, RCTInvalidating {
 
 @objc(AdyenDropInView)
 class AdyenDropInView: UIView {
-  static func decodeResponse(_ response: NSDictionary) -> PaymentResponse? {
-    do {
-      let JSON = try JSONSerialization.data(withJSONObject: response)
-      let decoded = try Coder.decode(JSON) as PaymentResponse
-      return decoded
-    } catch let err {
-      print(err)
-      return nil
-    }
+  static func decodeResponse(_ response: NSDictionary) throws -> PaymentResponse {
+    let JSON = try JSONSerialization.data(withJSONObject: response)
+    let decoded = try Coder.decode(JSON) as PaymentResponse
+    return decoded
   }
   
   private var _dropInComponent: DropInComponent?
@@ -101,8 +96,9 @@ class AdyenDropInView: UIView {
 
         let JSON = try JSONSerialization.data(withJSONObject: paymentMethods!)
         self._paymentMethods = try Coder.decode(JSON) as PaymentMethods
+        self.initDropInIfNeeded()
       } catch let err {
-        print("Failed to decode paymentMethods")
+        self.onError?(["message": "Failed to decode payment methods (\(err.localizedDescription)"])
         print(err)
       }
     }
@@ -117,6 +113,7 @@ class AdyenDropInView: UIView {
       if let clientKey = paymentMethodsConfiguration?.value(forKey: "clientKey") as? String {
         let parser = ConfigurationParser(clientKey)
         self._paymentMethodsConfiguration = parser.parse(paymentMethodsConfiguration!)
+        self.initDropInIfNeeded()
       }
     }
   }
@@ -127,8 +124,11 @@ class AdyenDropInView: UIView {
         return
       }
       
-      if let response = AdyenDropInView.decodeResponse(paymentResponse!) {
+      do {
+        let response = try AdyenDropInView.decodeResponse(paymentResponse!)
         self.handle(response)
+      } catch let err {
+        self.onError?(["message": "Failed to decode payment response (\(err.localizedDescription)"])
       }
     }
   }
@@ -139,8 +139,11 @@ class AdyenDropInView: UIView {
         return
       }
       
-      if let response = AdyenDropInView.decodeResponse(detailsResponse!) {
+      do {
+        let response = try AdyenDropInView.decodeResponse(detailsResponse!)
         self.handle(response)
+      } catch let err {
+        self.onError?(["message": "Failed to decode details response (\(err.localizedDescription)"])
       }
     }
   }
@@ -176,7 +179,12 @@ class AdyenDropInView: UIView {
     self.reactViewController()?.dismiss(animated: false, completion: nil)
   }
   
-  func initDropIn() {
+  func initDropInIfNeeded() {
+    guard self._dropInComponent == nil else {
+      print("Skipping initialization")
+      return
+    }
+    
     if (self._paymentMethods != nil && self._paymentMethodsConfiguration != nil) {
       print("Initializing drop-in")
       self._dropInComponent = DropInComponent(paymentMethods: _paymentMethods!, paymentMethodsConfiguration: _paymentMethodsConfiguration!)
@@ -199,7 +207,7 @@ class AdyenDropInView: UIView {
       return
     }
     
-    self.initDropIn()
+    self.initDropInIfNeeded()
 
     if (self._dropInComponent != nil) {
       self.reactViewController()?.present(self._dropInComponent!.viewController, animated: true, completion: nil)
