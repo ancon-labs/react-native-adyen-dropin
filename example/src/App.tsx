@@ -1,33 +1,53 @@
 import React, { useState, useEffect } from 'react';
-import { Platform, Button } from 'react-native';
+import { Alert, Button } from 'react-native';
 
 import { StyleSheet, View } from 'react-native';
 import AdyenDropIn from 'react-native-adyen-dropin';
 import config from '../config';
 
+// @ts-ignore
+import * as services from './services';
+
 export default function App() {
   const [visible, setVisible] = useState(false);
   const [paymentMethods, setPaymentMethods] = useState(null);
+  const [paymentResponse, setPaymentResponse] = useState(null);
+  const [detailsResponse, setDetailsResponse] = useState(null);
 
   useEffect(() => {
     async function init() {
-      const response = await fetch(
-        'http://192.168.0.12:3000/api/paymentMethods',
-        {
-          method: 'POST',
-          body: {
-            channel: Platform.OS,
-          },
-        }
-      ).then((r) => r.json());
-
-      console.log(JSON.stringify(response, undefined, 2));
-
+      const response = await services.getPaymentMethods();
       setPaymentMethods(response);
     }
 
     init();
   }, []);
+
+  async function handleSubmit(data: any) {
+    console.log('running handleSubmit');
+    console.log(data);
+    const response = await services.makePayment(data);
+    console.log('handleSubmit response');
+    console.log(response);
+    setPaymentResponse(response);
+  }
+
+  async function handleAdditionalDetails(data: any) {
+    console.log('running handleAdditionalDetails');
+    console.log(data);
+    const response = await services.makeDetailsCall(data);
+    console.log('handleAdditionalDetails response');
+    console.log(response);
+    setDetailsResponse(response);
+  }
+
+  function handleError(err: any) {
+    Alert.alert('Payment failure', JSON.stringify(err ?? {}, undefined, 2));
+  }
+
+  // function handleSuccess() {
+  //   Alert.alert('Payment success');
+  // }
 
   return (
     <View style={styles.container}>
@@ -39,17 +59,19 @@ export default function App() {
           environment: config.environment,
           countryCode: config.countryCode,
           applePay: {
+            amount: { value: 1, currencyCode: 'SEK' },
             configuration: {
               merchantId: config.applePay?.configuration?.merchantId,
             },
           },
-          payment: { value: 100, currencyCode: 'SEK' },
+          amount: { value: 100, currencyCode: 'SEK' },
         }}
-        onSubmit={(...args: [any]) => console.log('handle submit', ...args)}
-        onAdditionalDetails={(...args: [any]) =>
-          console.log('handle details', ...args)
-        }
-        onError={(...args: [any]) => console.log('handle error', ...args)}
+        paymentResponse={paymentResponse}
+        detailsResponse={detailsResponse}
+        onSubmit={handleSubmit}
+        onAdditionalDetails={handleAdditionalDetails}
+        onError={handleError}
+        // onSuccess={handleSuccess}
       />
       <Button title="Start payment" onPress={() => setVisible(true)} />
     </View>

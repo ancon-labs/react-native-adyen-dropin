@@ -5,6 +5,8 @@ type AdyenDropInProps = {
   visible?: boolean;
   paymentMethods?: any;
   paymentMethodsConfiguration?: any;
+  paymentResponse?: any;
+  detailsResponse?: any;
   onSubmit?: Function;
   onAdditionalDetails?: Function;
   onError?: Function;
@@ -21,6 +23,8 @@ const AdyenDropIn = React.forwardRef(
       visible = false,
       paymentMethods = {},
       paymentMethodsConfiguration = {},
+      paymentResponse,
+      detailsResponse,
       onSubmit,
       onAdditionalDetails,
       onError,
@@ -48,6 +52,8 @@ const AdyenDropIn = React.forwardRef(
         visible={visible}
         paymentMethods={paymentMethods}
         paymentMethodsConfiguration={paymentMethodsConfiguration}
+        paymentResponse={paymentResponse}
+        detailsResponse={detailsResponse}
         onSubmit={handleSubmit}
         onAdditionalDetails={handleAdditionalDetails}
         onError={handleError}

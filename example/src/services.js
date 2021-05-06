@@ -9,7 +9,7 @@ export const httpPost = (url, data) =>
   }).then((response) => response.json());
 
 export const getPaymentMethods = (configuration) =>
-  httpPost('http://localhost:3000/api/paymentMethods', configuration)
+  httpPost('http://192.168.0.12:3000/api/paymentMethods', configuration)
     .then((response) => {
       if (response.error) throw 'No paymentMethods available';
       return response;
@@ -22,7 +22,7 @@ export const makePayment = (data, config = {}) => {
   if (paymentRequest.order) {
     delete paymentRequest.amount;
   }
-  return httpPost('http://localhost:3000/api/payments', paymentRequest)
+  return httpPost('http://192.168.0.12:3000/api/payments', paymentRequest)
     .then((response) => {
       if (response.error) throw 'Payment initiation failed';
       return response;
@@ -31,7 +31,7 @@ export const makePayment = (data, config = {}) => {
 };
 
 export const makeDetailsCall = (data) =>
-  httpPost('http://localhost:3000/api/details', data)
+  httpPost('http://192.168.0.12:3000/api/payments/details', data)
     .then((response) => {
       if (response.error) throw 'Details call failed';
       return response;

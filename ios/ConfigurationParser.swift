@@ -35,9 +35,9 @@ struct ConfigurationParser {
       nextConfig.environment = ConfigurationParser.getEnvironment(environment)
     }
     
-    if let paymentConfig = config.value(forKey: "payment") as? NSDictionary {
-      let value = paymentConfig.value(forKey: "value") as! Int
-      let currencyCode = paymentConfig.value(forKey: "currencyCode") as! String
+    if let amountConfig = config.value(forKey: "amount") as? NSDictionary {
+      let value = amountConfig.value(forKey: "value") as! Int
+      let currencyCode = amountConfig.value(forKey: "currencyCode") as! String
       let amount = Payment.Amount(value: value, currencyCode: currencyCode)
       nextConfig.payment = Payment(amount: amount)
       

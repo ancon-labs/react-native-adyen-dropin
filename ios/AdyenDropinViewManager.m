@@ -6,6 +6,8 @@
 RCT_EXPORT_VIEW_PROPERTY(visible, BOOL?)
 RCT_EXPORT_VIEW_PROPERTY(paymentMethods, NSDictionary?)
 RCT_EXPORT_VIEW_PROPERTY(paymentMethodsConfiguration, NSDictionary?)
+RCT_EXPORT_VIEW_PROPERTY(paymentResponse, NSDictionary?)
+RCT_EXPORT_VIEW_PROPERTY(detailsResponse, NSDictionary?)
 RCT_EXPORT_VIEW_PROPERTY(onSubmit, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onAdditionalDetails, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onError, RCTDirectEventBlock)
