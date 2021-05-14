@@ -22,7 +22,7 @@ export const httpPost = async (url, data) => {
   throw responseData;
 };
 
-const BASE_URL = 'http://192.168.0.12:3000/api';
+const BASE_URL = 'http://172.20.10.4:3000/api';
 
 export const getPaymentMethods = async (configuration) =>
   httpPost(`${BASE_URL}/paymentMethods`, configuration);

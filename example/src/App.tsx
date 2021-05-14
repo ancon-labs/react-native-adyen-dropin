@@ -66,10 +66,12 @@ export default function App() {
   }
 
   function handleError(data: any) {
+    console.log('handleError', data);
     setError(data);
   }
 
   function handleSuccess(data: any) {
+    console.log('handleSuccess', data);
     Alert.alert('Payment success', JSON.stringify(data ?? {}, undefined, 2));
   }
 

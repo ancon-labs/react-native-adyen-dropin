@@ -1,0 +1,81 @@
+package com.reactnativeadyendropin
+
+import android.content.Context
+import android.util.Log
+import androidx.annotation.NonNull
+import com.adyen.checkout.card.CardConfiguration
+import com.adyen.checkout.card.data.CardType
+import com.adyen.checkout.components.base.Configuration
+import com.adyen.checkout.components.model.payments.Amount
+import com.adyen.checkout.core.api.Environment
+import com.adyen.checkout.core.util.LocaleUtil
+import com.adyen.checkout.dropin.DropInConfiguration
+import com.adyen.checkout.dropin.service.DropInService
+import com.facebook.react.bridge.ReactApplicationContext
+import com.facebook.react.bridge.ReadableMap
+import org.json.JSONObject
+import java.util.*
+import kotlin.collections.HashMap
+
+class ConfigurationParser(private val clientKey: String, context: ReactApplicationContext) {
+
+  private val context: Context = context
+
+  private  fun getShopperLocale(config: ReadableMap): Locale {
+    val providedShopperLocale = config.getString("shopperLocale")
+
+    if (providedShopperLocale != null) {
+      return LocaleUtil.fromLanguageTag(providedShopperLocale)
+    }
+
+    return Locale.getDefault()
+  }
+
+  private fun getEnvironment(config: ReadableMap): Environment {
+    val environmentName = config.getString("environment")
+
+    return when (environmentName) {
+      "test" -> Environment.TEST
+      "live" -> Environment.EUROPE
+      else -> Environment.TEST
+    }
+  }
+
+  private fun getAmount(config: ReadableMap): Amount {
+    val map = config.getMap("amount")
+    val value = map?.getInt("value") as? Int
+    val currencyCode = map?.getString("currencyCode") as? String
+    if (value != null && currencyCode != null) {
+      val json = JSONObject()
+        .put("value", value)
+        .put("currency", currencyCode)
+      val serializer = Amount.SERIALIZER
+
+      return serializer.deserialize(json)
+    }
+
+    return Amount()
+  }
+
+  fun parse(config: ReadableMap): DropInConfiguration {
+    val shopperLocale = this.getShopperLocale(config)
+    val environment = this.getEnvironment(config)
+    val amount = this.getAmount(config)
+    val cardConfiguration = CardConfiguration.Builder(shopperLocale, environment, this.clientKey)
+      .setShopperReference("test")
+      .setSupportedCardTypes(CardType.MASTERCARD, CardType.VISA)
+      .build()
+
+    val builder = DropInConfiguration.Builder(
+      this.context,
+      AdyenDropInService::class.java,
+      this.clientKey
+    )
+      .setShopperLocale(shopperLocale)
+      .setEnvironment(environment)
+      .setAmount(amount)
+      .addCardConfiguration(cardConfiguration)
+
+    return builder.build()
+  }
+}
