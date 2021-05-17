@@ -33,6 +33,7 @@ export default function App() {
 
   useEffect(() => {
     if (error) {
+      console.log('Show error', error);
       Alert.alert('Payment failure', JSON.stringify(error ?? {}, undefined, 2));
     }
   }, [error]);
@@ -60,6 +61,7 @@ export default function App() {
       console.log(response);
       setDetailsResponse(response);
     } catch (err) {
+      setDetailsResponse(err);
       setVisible(false);
       setError(err);
     }

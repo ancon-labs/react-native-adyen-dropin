@@ -9,6 +9,8 @@ import com.adyen.checkout.components.model.PaymentMethodsApiResponse
 import com.adyen.checkout.core.log.Logger
 import com.adyen.checkout.dropin.DropIn
 import com.adyen.checkout.dropin.DropInConfiguration
+import com.adyen.checkout.dropin.DropInResult
+import com.adyen.checkout.dropin.databinding.FragmentActionComponentBinding
 import com.adyen.checkout.dropin.service.DropInService
 import com.adyen.checkout.dropin.service.DropInServiceResult
 import com.adyen.checkout.dropin.ui.DropInActivity
@@ -46,6 +48,8 @@ class AdyenDropInViewManager(private var reactContext : ReactApplicationContext)
   var _view: View? = null
 
   var _service: AdyenDropInService? = null
+
+  var _isHandlingAction = false
 
   // Events
   var onSuccessEmitter: (() -> Unit)? = null
@@ -197,9 +201,11 @@ class AdyenDropInViewManager(private var reactContext : ReactApplicationContext)
   }
 
   fun close() {
-    if (AdyenDropInService.getInstance()?.isActive == true) {
+    if (AdyenDropInService.getInstance()?.isActive == true && !this._isHandlingAction) {
+      this.onClose()
       Log.d(TAG, "Close was called")
       reactContext.currentActivity?.finishActivity(DropIn.DROP_IN_REQUEST_CODE)
+      this._isHandlingAction = false
     }
   }
 
@@ -235,24 +241,28 @@ class AdyenDropInViewManager(private var reactContext : ReactApplicationContext)
 
   fun handleAction(action: String) {
     Log.d(TAG, "handleAction")
+    this._isHandlingAction = true
     this._service?.sendDropInResult(DropInServiceResult.Action(action))
   }
 
   fun handleFinishWithSuccess(resultCode: String) {
     Log.d(TAG, "handleFinishWithSuccess")
+    this._isHandlingAction = false
     this._service?.sendDropInResult(DropInServiceResult.Finished(resultCode))
     val event = Arguments.createMap()
     event.putString("resultCode", resultCode)
+    this.onCloseEmitter = { this.onClose() }
     this.onSuccessEmitter = { this.onSuccess(event) }
   }
 
   fun handleFinishWithError(resultCode: String) {
     Log.d(TAG, "handleFinishWithError")
+    this._isHandlingAction = false
     this._service?.sendDropInResult(DropInServiceResult.Error())
     val event = Arguments.createMap()
     event.putString("resultCode", resultCode)
-    this.close()
     this.onErrorEmitter = { this.onError(event) }
+    this.close()
   }
 
   fun emitEvents() {
@@ -293,6 +303,9 @@ class AdyenDropInViewManager(private var reactContext : ReactApplicationContext)
   }
 
   override fun onActivityResult(activity: Activity?, requestCode: Int, resultCode: Int, data: Intent?) {
+    if (requestCode == DropIn.DROP_IN_REQUEST_CODE) {
+      this._isHandlingAction = false
+    }
     Log.d(TAG, "onActivityResult - " +
       "data: ${activity?.toString() ?: "(null)"}" +
       "requestCode: ${requestCode}" +
