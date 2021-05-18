@@ -11,7 +11,7 @@ yarn add react-native-adyen-dropin
 ## Usage
 
 ```js
-import AdyenDropin from 'react-native-adyen-dropin';
+import AdyenDropin from '@ancon/react-native-adyen-dropin';
 
 // ...
 
