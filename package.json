@@ -36,13 +36,13 @@
     "ios",
     "android"
   ],
-  "repository": "https://bitbucket.org/anconab/wildcat.reactnativeadyendropin/src/master/",
+  "repository": "git@github.com:ancon-labs/react-native-adyen-dropin.git",
   "author": "Jesper Johansson <jesper.johansson@ancon.io> (https://ancon.io)",
   "license": "MIT",
   "bugs": {
-    "url": "https://bitbucket.org/anconab/wildcat.reactnativeadyendropin/src/master//issues"
+    "url": "https://github.com/ancon-labs/react-native-adyen-dropin/issues"
   },
-  "homepage": "https://bitbucket.org/anconab/wildcat.reactnativeadyendropin/src/master/#readme",
+  "homepage": "https://github.com/ancon-labs/react-native-adyen-dropin",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",
     "access": "public"
