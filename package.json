@@ -1,5 +1,5 @@
 {
-  "name": "react-native-adyen-dropin",
+  "name": "@ancon/react-native-adyen-dropin",
   "version": "0.1.0",
   "description": "React Native bridge for Adyen drop-in",
   "main": "lib/commonjs/index",
@@ -44,7 +44,8 @@
   },
   "homepage": "https://bitbucket.org/anconab/wildcat.reactnativeadyendropin/src/master/#readme",
   "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
   },
   "devDependencies": {
     "@commitlint/config-conventional": "^11.0.0",
