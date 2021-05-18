@@ -5,17 +5,30 @@ React Native bridge for Adyen drop-in
 ## Installation
 
 ```sh
-npm install react-native-adyen-dropin
+yarn add react-native-adyen-dropin
 ```
 
 ## Usage
 
 ```js
-import AdyenDropin from "react-native-adyen-dropin";
+import AdyenDropin from 'react-native-adyen-dropin';
 
 // ...
 
-const result = await AdyenDropin.multiply(3, 7);
+return (
+  <AdyenDropIn
+    visible={visible}
+    paymentMethods={paymentMethods}
+    paymentMethodsConfiguration={paymentMethodsConfiguration}
+    paymentResponse={paymentResponse}
+    detailsResponse={detailsResponse}
+    onSubmit={handleSubmit}
+    onAdditionalDetails={handleAdditionalDetails}
+    onError={handleError}
+    onSuccess={handleSuccess}
+    onClose={handleClose}
+  />
+);
 ```
 
 ## Contributing
