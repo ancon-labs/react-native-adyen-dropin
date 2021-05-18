@@ -1,3 +1,5 @@
+import { Platform } from 'react-native';
+
 export const httpPost = async (url, data) => {
   const response = await fetch(url, {
     method: 'POST',
@@ -5,6 +7,7 @@ export const httpPost = async (url, data) => {
       'Accept': 'application/json, text/plain, */*',
       'Content-Type': 'application/json',
       'Authorization': '',
+      'x-channel': Platform.OS,
     },
     body: JSON.stringify(data) ?? '{}',
   });
