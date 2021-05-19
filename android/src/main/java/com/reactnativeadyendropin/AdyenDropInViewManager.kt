@@ -204,7 +204,7 @@ class AdyenDropInViewManager(private var reactContext : ReactApplicationContext)
     if (AdyenDropInService.getInstance()?.isActive == true && !this._isHandlingAction) {
       this.onClose()
       Log.d(TAG, "Close was called")
-      reactContext.currentActivity?.finishActivity(DropIn.DROP_IN_REQUEST_CODE)
+      this._service?.sendDropInResult(DropInServiceResult.Finished("closed"))
       this._isHandlingAction = false
     }
   }
