@@ -1,5 +1,5 @@
 {
-  "name": "react-native-adyen-dropin-example",
+  "name": "@ancon/react-native-adyen-dropin-example",
   "description": "Example app for react-native-adyen-dropin",
   "version": "0.0.1",
   "private": true,

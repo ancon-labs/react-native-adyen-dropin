@@ -2,7 +2,7 @@
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
-      "react-native-adyen-dropin": ["./src/index"]
+      "@adyen/react-native-adyen-dropin": ["./src/index"]
     },
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,

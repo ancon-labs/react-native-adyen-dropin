@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Alert, Button } from 'react-native';
 
 import { StyleSheet, View } from 'react-native';
-import AdyenDropIn from 'react-native-adyen-dropin';
+import AdyenDropIn from '@ancon/react-native-adyen-dropin';
 
 const { default: config } = __DEV__
   ? require('../config')
