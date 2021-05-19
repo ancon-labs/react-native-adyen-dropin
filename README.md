@@ -5,7 +5,7 @@ React Native bridge for Adyen drop-in
 ## Installation
 
 ```sh
-yarn add react-native-adyen-dropin
+yarn add @ancon/react-native-adyen-dropin
 ```
 
 ## Usage
