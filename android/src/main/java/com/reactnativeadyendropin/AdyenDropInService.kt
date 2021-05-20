@@ -54,7 +54,6 @@ class AdyenDropInService : DropInService() {
   override fun onDestroy() {
     super.onDestroy()
     val instance = AdyenDropInViewManager.getInstance()
-    instance?.onClose()
     instance?.emitEvents()
   }
 }
