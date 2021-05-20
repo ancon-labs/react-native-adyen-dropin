@@ -16,7 +16,9 @@ export default function App() {
   const [paymentMethods, setPaymentMethods] = useState(null);
   const [paymentResponse, setPaymentResponse] = useState(null);
   const [detailsResponse, setDetailsResponse] = useState(null);
+
   const [error, setError] = useState(null);
+  const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
     async function init() {
@@ -32,11 +34,19 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (error) {
+    if (error && !visible) {
       console.log('Show error', error);
-      Alert.alert('Payment failure', JSON.stringify(error ?? {}, undefined, 2));
+      Alert.alert(
+        'Payment failure',
+        JSON.stringify(error ?? {}, undefined, 2),
+        [
+          {
+            onPress: () => setError(null),
+          },
+        ]
+      );
     }
-  }, [error]);
+  }, [error, visible]);
 
   async function handleSubmit(data: any) {
     try {
@@ -47,7 +57,7 @@ export default function App() {
       console.log(response);
       setPaymentResponse(response);
     } catch (err) {
-      setVisible(false);
+      setIsClosing(true);
       setError(err);
     }
   }
@@ -61,8 +71,7 @@ export default function App() {
       console.log(response);
       setDetailsResponse(response);
     } catch (err) {
-      setDetailsResponse(err);
-      setVisible(false);
+      setIsClosing(true);
       setError(err);
     }
   }
@@ -79,12 +88,13 @@ export default function App() {
 
   function handleClose() {
     setVisible(false);
+    setIsClosing(false);
   }
 
   return (
     <View style={styles.container}>
       <AdyenDropIn
-        visible={visible}
+        visible={isClosing === true ? false : visible}
         paymentMethods={paymentMethods}
         paymentMethodsConfiguration={{
           clientKey: config.clientKey,
