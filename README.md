@@ -37,6 +37,21 @@ return (
 );
 ```
 
+## Props
+
+| Props                       | Type     | Description                                                    | Default |
+| --------------------------- | -------- | -------------------------------------------------------------- | ------- |
+| visible                     | boolean  | Whether or not the drop-in should show                         | false   |
+| paymentMethods              | object   | Payment methods response object                                | {}      |
+| paymentMethodsConfiguration | object   | Payment methods configuration object                           | {}      |
+| paymentResponse             | object   | Payment response object (onSubmit request)                     |         |
+| detailsResponse             | object   | Details response object (onAdditionalDetails request)          |         |
+| onSubmit                    | function | Callback with data when making a new payment                   |         |
+| onAdditionalDetails         | function | Callback with data when an action is required                  |         |
+| onError                     | function | Callback with error (if available) on error or payment failure |         |
+| onSuccess                   | function | Callback with resultCode on payment success                    |         |
+| onClose                     | function | Callback when the drop-in was closed                           |         |
+
 ## Contributing
 
 See the [contributing guide](CONTRIBUTING.md) to learn how to contribute to the repository and the development workflow.
