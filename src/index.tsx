@@ -19,6 +19,14 @@ export const AdyenDropInModule = requireNativeComponent<AdyenDropInProps>(
   'AdyenDropIn'
 );
 
+function cleanEvent(event: any): any {
+  if (event && typeof event === 'object' && event.target !== undefined) {
+    delete event.target;
+  }
+
+  return event;
+}
+
 const AdyenDropIn = React.forwardRef(
   (
     {
@@ -39,23 +47,23 @@ const AdyenDropIn = React.forwardRef(
     const forwardedRef = ref as React.RefObject<any>;
 
     function handleSubmit(event: any) {
-      onSubmit?.(event.nativeEvent);
+      onSubmit?.(cleanEvent(event.nativeEvent));
     }
 
     function handleError(event: any) {
-      onError?.(event.nativeEvent);
+      onError?.(cleanEvent(event.nativeEvent));
     }
 
     function handleAdditionalDetails(event: any) {
-      onAdditionalDetails?.(event.nativeEvent);
+      onAdditionalDetails?.(cleanEvent(event.nativeEvent));
     }
 
     function handleSuccess(event: any) {
-      onSuccess?.(event.nativeEvent);
+      onSuccess?.(cleanEvent(event.nativeEvent));
     }
 
     function handleClose(event: any) {
-      onClose?.(event.nativeEvent);
+      onClose?.(cleanEvent(event.nativeEvent));
     }
 
     return (
