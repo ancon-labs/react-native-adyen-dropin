@@ -1,3 +1,6 @@
+![CircleCI](https://img.shields.io/circleci/build/github/ancon-labs/react-native-adyen-dropin)
+![npm](https://img.shields.io/npm/v/@ancon/react-native-adyen-dropin)
+
 # react-native-adyen-dropin
 
 React Native bridge for Adyen drop-in
