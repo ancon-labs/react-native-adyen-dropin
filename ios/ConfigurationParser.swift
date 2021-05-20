@@ -31,10 +31,6 @@ struct ConfigurationParser {
   func parse(_ config: NSDictionary) -> DropInComponent.PaymentMethodsConfiguration {
     let nextConfig = self.config
     
-    if let environment = config.value(forKey: "environment") as? String {
-      nextConfig.environment = ConfigurationParser.getEnvironment(environment)
-    }
-    
     if let amountConfig = config.value(forKey: "amount") as? NSDictionary {
       let value = amountConfig.value(forKey: "value") as! Int
       let currencyCode = amountConfig.value(forKey: "currencyCode") as! String
@@ -60,11 +56,11 @@ struct ConfigurationParser {
         }
       }
       
-      nextConfig.applePay.summaryItems = [summaryItem]
+      nextConfig.applePay?.summaryItems = [summaryItem]
       
       if let nestedConfig = applePayConfig.value(forKey: "configuration") as? NSDictionary {
         if let merchantIdentifier = nestedConfig.value(forKey: "merchantId") as? String {
-          nextConfig.applePay.merchantIdentifier = merchantIdentifier
+          nextConfig.applePay?.merchantIdentifier = merchantIdentifier
         }
       }
     }

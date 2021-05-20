@@ -189,6 +189,9 @@ class AdyenDropInView: UIView {
       print("Initializing drop-in")
       self._dropInComponent = DropInComponent(paymentMethods: _paymentMethods!, paymentMethodsConfiguration: _paymentMethodsConfiguration!)
       self._dropInComponent?.delegate = self
+      if let environment = paymentMethodsConfiguration?.value(forKey: "environment") as? String {
+        self._dropInComponent?.environment = ConfigurationParser.getEnvironment(environment)
+      }
     } else {
       print("Skipped init because either paymentMethods or paymentMethodsConfiguration was not set")
     }
