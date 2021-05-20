@@ -8,6 +8,12 @@ React Native bridge for Adyen drop-in
 yarn add @ancon/react-native-adyen-dropin
 ```
 
+### iOS
+
+```sh
+cd ios && pod install
+```
+
 ## Usage
 
 ```js
