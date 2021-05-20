@@ -231,6 +231,7 @@ class AdyenDropInView: UIView {
     }
     
     self._dropInComponent!.viewController.dismiss(animated: true) {
+      self._dropInComponent = nil
       self.onClose?([:])
     }
   }
@@ -282,6 +283,7 @@ extension AdyenDropInView: DropInComponentDelegate {
   }
   
   func didProvide(_ data: ActionComponentData, from component: DropInComponent) {
+    print("didProvide")
     self.onAdditionalDetails?([
       "details": data.details.dictionary as Any,
       "paymentData": (data.paymentData ?? "") as String
@@ -294,6 +296,7 @@ extension AdyenDropInView: DropInComponentDelegate {
   }
   
   func didFail(with error: Error, from component: DropInComponent) {
+    print("didFail")
     let isCancelled = (error as? ComponentError) == .cancelled
     if (!isCancelled) {
       self.onError?(["error": error.localizedDescription])
