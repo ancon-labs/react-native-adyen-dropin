@@ -1,5 +1,9 @@
-![CircleCI](https://img.shields.io/circleci/build/github/ancon-labs/react-native-adyen-dropin)
-![npm](https://img.shields.io/npm/v/@ancon/react-native-adyen-dropin)
+<a href="https://app.circleci.com/pipelines/github/ancon-labs/react-native-adyen-dropin">
+  <img src="https://img.shields.io/circleci/build/github/ancon-labs/react-native-adyen-dropin">
+</a>
+<a href="https://www.npmjs.com/package/@ancon/react-native-adyen-dropin">
+  <img src="https://img.shields.io/npm/v/@ancon/react-native-adyen-dropin">
+</a>
 
 # react-native-adyen-dropin
 
