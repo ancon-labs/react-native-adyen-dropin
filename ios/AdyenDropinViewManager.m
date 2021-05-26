@@ -3,6 +3,7 @@
 
 @interface RCT_EXTERN_REMAP_MODULE(AdyenDropIn, AdyenDropInViewManager, RCTViewManager)
 
+RCT_EXPORT_VIEW_PROPERTY(debug, BOOL?)
 RCT_EXPORT_VIEW_PROPERTY(visible, BOOL?)
 RCT_EXPORT_VIEW_PROPERTY(paymentMethods, NSDictionary?)
 RCT_EXPORT_VIEW_PROPERTY(paymentMethodsConfiguration, NSDictionary?)

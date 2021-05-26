@@ -41,9 +41,8 @@ class AdyenDropInViewManager: RCTViewManager, RCTInvalidating {
   private var viewInstance: AdyenDropInView?
   
   func invalidate() {
-    print("Invalidating drop-in...")
-    print(self.viewInstance != nil)
     if (self.viewInstance != nil) {
+      self.viewInstance?.log("Invalidating drop-in...")
       DispatchQueue.main.async {
         self.viewInstance?.invalidate()
       }
@@ -51,7 +50,6 @@ class AdyenDropInViewManager: RCTViewManager, RCTInvalidating {
   }
   
   override func view() -> (AdyenDropInView) {
-    AdyenLogging.isEnabled = true
     self.viewInstance = AdyenDropInView()
     return self.viewInstance!
   }
@@ -77,6 +75,16 @@ class AdyenDropInView: UIView {
   
   private var _invalidating: Bool = false
   
+  @objc var debug: Bool = false {
+    didSet {
+      if (debug) {
+        self.enableLogging()
+      } else {
+        self.disableLogging()
+      }
+    }
+  }
+    
   @objc var visible: Bool = false {
     didSet {
       if (visible) {
@@ -98,8 +106,7 @@ class AdyenDropInView: UIView {
         self._paymentMethods = try Coder.decode(JSON) as PaymentMethods
         self.initDropInIfNeeded()
       } catch let err {
-        self.onError?(["message": "Failed to decode payment methods (\(err.localizedDescription)"])
-        print(err)
+        self.handleInternalError(err)
       }
     }
   }
@@ -163,14 +170,14 @@ class AdyenDropInView: UIView {
     self._invalidating = true
     
     if (self._dropInComponent?.viewController != nil) {
-      print("Drop-in was visible on invalidation - closing")
+      self.log("Drop-in was visible on invalidation - closing")
       self._dropInComponent!.viewController.dismiss(animated: true) {
         self._dropInComponent = nil
         self._paymentMethods = nil
         self._paymentMethodsConfiguration = nil
       }
     } else {
-      print("Drop-in was not visible on invalidation")
+      self.log("Drop-in was not visible on invalidation")
       self._dropInComponent = nil
       self._paymentMethods = nil
       self._paymentMethodsConfiguration = nil
@@ -181,32 +188,32 @@ class AdyenDropInView: UIView {
   
   func initDropInIfNeeded() {
     guard self._dropInComponent == nil else {
-      print("Skipping initialization")
+      self.log("Skipping initialization")
       return
     }
     
     if (self._paymentMethods != nil && self._paymentMethodsConfiguration != nil) {
-      print("Initializing drop-in")
+      self.log("Initializing drop-in")
       self._dropInComponent = DropInComponent(paymentMethods: _paymentMethods!, paymentMethodsConfiguration: _paymentMethodsConfiguration!)
       self._dropInComponent?.delegate = self
       if let environment = paymentMethodsConfiguration?.value(forKey: "environment") as? String {
         self._dropInComponent?.environment = ConfigurationParser.getEnvironment(environment)
       }
     } else {
-      print("Skipped init because either paymentMethods or paymentMethodsConfiguration was not set")
+      self.log("Skipped init because either paymentMethods or paymentMethodsConfiguration was not set")
     }
   }
   
   func open() {
-    print("Open was called")
+    self.log("Open was called")
     
     guard !self._invalidating else {
-      print("Skipping open because invalidating")
+      self.log("Skipping open because invalidating")
       return
     }
     
     guard !(self.isDropInVisible()) else {
-      print("Skipping open because viewController is already presenting")
+      self.log("Skipping open because viewController is already presenting")
       return
     }
     
@@ -218,15 +225,15 @@ class AdyenDropInView: UIView {
   }
   
   func close() {
-    print("Close was called")
+    self.log("Close was called")
     
     guard !self._invalidating else {
-      print("Skipping close because invalidating")
+      self.log("Skipping close because invalidating")
       return
     }
     
     guard (self.isDropInVisible()) else {
-      print("Skipping close because viewController is not being presented")
+      self.log("Skipping close because viewController is not being presented")
       return
     }
     
@@ -267,7 +274,27 @@ class AdyenDropInView: UIView {
   internal func finish(with error: Error) {
     let isCancelled = (error as? ComponentError) == .cancelled
     if (!isCancelled) {
-      self.onError?(["error": error.localizedDescription])
+      self.onError?(["message": error.localizedDescription])
+    }
+  }
+  
+  internal func handleInternalError(_ error: Error) {
+    let message = error.localizedDescription
+    self.onError?(["message": message])
+    self.log(message)
+  }
+  
+  internal func enableLogging() {
+    AdyenLogging.isEnabled = true
+  }
+  
+  internal func disableLogging() {
+    AdyenLogging.isEnabled = false
+  }
+  
+  internal func log(_ message: String) {
+    if (self.debug) {
+      print(message)
     }
   }
 }
@@ -283,7 +310,7 @@ extension AdyenDropInView: DropInComponentDelegate {
   }
   
   func didProvide(_ data: ActionComponentData, from component: DropInComponent) {
-    print("didProvide")
+    self.log("didProvide")
     self.onAdditionalDetails?([
       "details": data.details.dictionary as Any,
       "paymentData": (data.paymentData ?? "") as String
@@ -291,12 +318,12 @@ extension AdyenDropInView: DropInComponentDelegate {
   }
   
   func didComplete(from component: DropInComponent) {
-    print("didComplete")
+    self.log("didComplete")
     self.finish(with: .authorised)
   }
   
   func didFail(with error: Error, from component: DropInComponent) {
-    print("didFail")
+    self.log("didFail")
     let isCancelled = (error as? ComponentError) == .cancelled
     if (!isCancelled) {
       self.onError?(["error": error.localizedDescription])
@@ -305,7 +332,7 @@ extension AdyenDropInView: DropInComponentDelegate {
   }
   
   func didCancel(component: PaymentComponent, from dropInComponent: DropInComponent) {
-    print("didCancel")
+    self.log("didCancel")
   }
 }
 
