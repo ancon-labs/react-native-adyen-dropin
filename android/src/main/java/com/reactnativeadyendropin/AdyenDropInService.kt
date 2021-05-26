@@ -1,14 +1,9 @@
 package com.reactnativeadyendropin
 
-import android.content.Intent
-import android.util.Log
 import com.adyen.checkout.components.ActionComponentData
 import com.adyen.checkout.components.PaymentComponentState
 import com.adyen.checkout.dropin.service.DropInService
 import com.adyen.checkout.dropin.service.DropInServiceResult
-import com.facebook.react.bridge.ReactApplicationContext
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import org.json.JSONObject
 
 class AdyenDropInService : DropInService() {

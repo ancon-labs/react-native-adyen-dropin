@@ -1,21 +1,16 @@
 package com.reactnativeadyendropin
 
 import android.content.Context
-import android.util.Log
-import androidx.annotation.NonNull
 import com.adyen.checkout.card.CardConfiguration
 import com.adyen.checkout.card.data.CardType
-import com.adyen.checkout.components.base.Configuration
 import com.adyen.checkout.components.model.payments.Amount
 import com.adyen.checkout.core.api.Environment
 import com.adyen.checkout.core.util.LocaleUtil
 import com.adyen.checkout.dropin.DropInConfiguration
-import com.adyen.checkout.dropin.service.DropInService
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReadableMap
 import org.json.JSONObject
 import java.util.*
-import kotlin.collections.HashMap
 
 class ConfigurationParser(private val clientKey: String, context: ReactApplicationContext) {
 

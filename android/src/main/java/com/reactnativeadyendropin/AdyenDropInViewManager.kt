@@ -2,27 +2,19 @@ package com.reactnativeadyendropin
 
 import android.app.Activity
 import android.content.Intent
-import android.os.Bundle
 import android.util.Log
 import android.view.View
 import com.adyen.checkout.components.model.PaymentMethodsApiResponse
 import com.adyen.checkout.core.log.Logger
 import com.adyen.checkout.dropin.DropIn
 import com.adyen.checkout.dropin.DropInConfiguration
-import com.adyen.checkout.dropin.DropInResult
-import com.adyen.checkout.dropin.databinding.FragmentActionComponentBinding
-import com.adyen.checkout.dropin.service.DropInService
 import com.adyen.checkout.dropin.service.DropInServiceResult
-import com.adyen.checkout.dropin.ui.DropInActivity
-import com.adyen.checkout.dropin.ui.DropInViewModel
-import com.adyen.checkout.dropin.ui.base.DropInBottomSheetDialogFragment
 import com.facebook.react.bridge.*
 import com.facebook.react.common.MapBuilder
 import com.facebook.react.uimanager.SimpleViewManager
 import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.uimanager.annotations.ReactProp
 import com.facebook.react.uimanager.events.RCTEventEmitter
-import kotlinx.coroutines.isActive
 import org.json.JSONObject
 
 
