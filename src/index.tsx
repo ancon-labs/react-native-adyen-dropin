@@ -2,6 +2,7 @@ import React from 'react';
 import { requireNativeComponent, ViewStyle } from 'react-native';
 
 type AdyenDropInProps = {
+  debug?: boolean;
   visible?: boolean;
   paymentMethods?: any;
   paymentMethodsConfiguration?: any;
@@ -30,6 +31,7 @@ function cleanEvent(event: any): any {
 const AdyenDropIn = React.forwardRef(
   (
     {
+      debug = false,
       visible = false,
       paymentMethods = {},
       paymentMethodsConfiguration = {},
@@ -69,6 +71,7 @@ const AdyenDropIn = React.forwardRef(
     return (
       <AdyenDropInModule
         ref={forwardedRef}
+        debug={debug}
         visible={visible}
         paymentMethods={paymentMethods}
         paymentMethodsConfiguration={paymentMethodsConfiguration}

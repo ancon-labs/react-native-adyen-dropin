@@ -94,6 +94,7 @@ export default function App() {
   return (
     <View style={styles.container}>
       <AdyenDropIn
+        debug={__DEV__}
         visible={isClosing === true ? false : visible}
         paymentMethods={paymentMethods}
         paymentMethodsConfiguration={{
