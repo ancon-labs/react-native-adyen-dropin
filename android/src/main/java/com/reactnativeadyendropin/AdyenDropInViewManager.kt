@@ -37,6 +37,8 @@ class AdyenDropInViewManager(private var reactContext : ReactApplicationContext)
 
   private val TAG = "AdyenDropInViewManager"
 
+  var debug = false
+
   var _paymentMethods: PaymentMethodsApiResponse? = null
 
   var _paymentMethodsConfiguration: DropInConfiguration? = null
@@ -60,9 +62,34 @@ class AdyenDropInViewManager(private var reactContext : ReactApplicationContext)
     reactContext.addActivityEventListener(this)
   }
 
+  fun enableLogging() {
+    Logger.setLogcatLevel(Log.VERBOSE)
+    this.debug = true
+  }
+
+  fun disableLogging() {
+    Logger.setLogcatLevel(Logger.NONE)
+    this.debug = false
+  }
+
+  fun log(message: String) {
+    if (this.debug) {
+      Log.d(TAG, message)
+    }
+  }
+
+  @ReactProp(name = "debug")
+  fun setDebug(view: View, debug: Boolean?) {
+    if (debug == true) {
+      this.enableLogging()
+    } else if (debug == false) {
+      this.disableLogging()
+    }
+  }
+
   @ReactProp(name = "visible")
   fun setVisible(view: View, visible: Boolean?) {
-    Log.d(TAG, "visible - ${visible}")
+    this.log("visible - ${visible}")
     if (visible == true) {
       this.open()
     } else if (visible == false) {
@@ -79,8 +106,7 @@ class AdyenDropInViewManager(private var reactContext : ReactApplicationContext)
       val serializer = PaymentMethodsApiResponse.SERIALIZER
       this._paymentMethods = serializer.deserialize(json)
     } catch (err: Exception) {
-      // TODO: onError
-      Log.e(TAG, err.message ?: err.toString())
+      this.handleInternalError(err, "Unknown error in setPaymentMethods")
     }
   }
 
@@ -92,8 +118,7 @@ class AdyenDropInViewManager(private var reactContext : ReactApplicationContext)
       val clientKey = paymentMethodsConfiguration.getString("clientKey") ?: return
       this._paymentMethodsConfiguration = ConfigurationParser(clientKey, this.reactContext).parse(paymentMethodsConfiguration)
     } catch (err: Exception) {
-      // TODO: onError
-      Log.e(TAG, err.message ?: err.toString())
+      this.handleInternalError(err, "Unknown error in setPaymentMethodsConfiguration")
     }
   }
 
@@ -105,8 +130,7 @@ class AdyenDropInViewManager(private var reactContext : ReactApplicationContext)
       this._paymentResponse = JSONObject(paymentResponse.toHashMap())
       this.handleResponse(paymentResponse)
     } catch (err: Exception) {
-      // TODO: onError
-      Log.e(TAG, err.message ?: err.toString())
+      this.handleInternalError(err, "Unknown error in setPaymentResponse")
     }
   }
 
@@ -118,8 +142,7 @@ class AdyenDropInViewManager(private var reactContext : ReactApplicationContext)
       this._detailsResponse = JSONObject(detailsResponse.toHashMap())
       this.handleResponse(detailsResponse)
     } catch (err: Exception) {
-      // TODO: onError
-      Log.e(TAG, err.message ?: err.toString())
+      this.handleInternalError(err, "Unknown error in setDetailsResponse")
     }
   }
 
@@ -161,7 +184,6 @@ class AdyenDropInViewManager(private var reactContext : ReactApplicationContext)
     )
   }
 
-
   @ReactMethod
   fun onClose() {
     val event = Arguments.createMap()
@@ -173,21 +195,21 @@ class AdyenDropInViewManager(private var reactContext : ReactApplicationContext)
   }
 
   fun open() {
-    Log.d(TAG, "Open was called")
+    this.log("Open was called")
 
     if (this.reactContext.currentActivity == null) {
-      Log.d(TAG, "Skipping open - currentActivity was null")
+      this.log("Skipping open - currentActivity was null")
       return
     }
 
     if (this._paymentMethods == null) {
-      Log.d(TAG, "Skipping open - paymentMethods was null")
+      this.log("Skipping open - paymentMethods was null")
       return
     }
 
 
     if (this._paymentMethodsConfiguration == null) {
-      Log.d(TAG, "Skipping open - paymentMethodsConfiguration was null")
+      this.log("Skipping open - paymentMethodsConfiguration was null")
       return
     }
 
@@ -200,13 +222,13 @@ class AdyenDropInViewManager(private var reactContext : ReactApplicationContext)
   }
 
   fun close() {
-    Log.d(TAG, "Close was called")
+    this.log("Close was called")
     this._service?.sendDropInResult(DropInServiceResult.Finished("closed"))
   }
 
   fun handleResponse(response: ReadableMap) {
     val resultCode = response.getString("resultCode")
-    Log.d(TAG, "Handle response - ${resultCode}")
+    this.log("Handle response - ${resultCode}")
 
     when (resultCode) {
       "Authorised",
@@ -219,7 +241,7 @@ class AdyenDropInViewManager(private var reactContext : ReactApplicationContext)
         val action = response.getMap("action")
         if (action != null) {
           val actionJsonString = JSONObject(action.toHashMap()).toString()
-          Log.d(TAG, actionJsonString)
+          this.log(actionJsonString)
           this.handleAction(actionJsonString)
         } else {
           this.handleFinishWithSuccess(resultCode)
@@ -235,12 +257,21 @@ class AdyenDropInViewManager(private var reactContext : ReactApplicationContext)
   }
 
   fun handleAction(action: String) {
-    Log.d(TAG, "handleAction")
+    this.log("handleAction")
     this._service?.sendDropInResult(DropInServiceResult.Action(action))
   }
 
+  fun handleInternalError(err: Exception, fallbackMessage: String?) {
+    val message = err.message ?: fallbackMessage ?: "Unknown AdyenDropIn error"
+    val event = Arguments.createMap()
+    event.putString("message", message)
+
+    this.onErrorEmitter = { this.onError(event) }
+    this.log(message)
+  }
+
   fun handleFinishWithSuccess(resultCode: String) {
-    Log.d(TAG, "handleFinishWithSuccess")
+    this.log( "handleFinishWithSuccess")
     this._service?.sendDropInResult(DropInServiceResult.Finished(resultCode))
     val event = Arguments.createMap()
     event.putString("resultCode", resultCode)
@@ -249,7 +280,7 @@ class AdyenDropInViewManager(private var reactContext : ReactApplicationContext)
   }
 
   fun handleFinishWithError(resultCode: String) {
-    Log.d(TAG, "handleFinishWithError")
+    this.log("handleFinishWithError")
     this._service?.sendDropInResult(DropInServiceResult.Error())
     val event = Arguments.createMap()
     event.putString("resultCode", resultCode)
@@ -291,14 +322,14 @@ class AdyenDropInViewManager(private var reactContext : ReactApplicationContext)
   }
 
   override fun onNewIntent(intent: Intent?) {
-    Log.d(TAG, "onNewIntent - ${intent?.toString() ?: "unknown"}")
+    this.log("onNewIntent - ${intent?.toString() ?: "unknown"}")
   }
 
   override fun onActivityResult(activity: Activity?, requestCode: Int, resultCode: Int, data: Intent?) {
     if (requestCode != DropIn.DROP_IN_REQUEST_CODE) return
 
     if (data != null) {
-      Log.d(TAG, "INTENT RESULT - ${DropIn.getDropInResultFromIntent(data)}")
+      this.log("INTENT RESULT - ${DropIn.getDropInResultFromIntent(data)}")
     }
 
     if (
@@ -308,7 +339,7 @@ class AdyenDropInViewManager(private var reactContext : ReactApplicationContext)
       this.onClose()
     }
 
-    Log.d(TAG, "onActivityResult - " +
+    this.log("onActivityResult - " +
       "data: ${activity?.toString() ?: "(null)"}" +
       "requestCode: ${requestCode}" +
       "resultCode: ${resultCode}" +

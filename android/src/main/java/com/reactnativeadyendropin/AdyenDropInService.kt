@@ -31,9 +31,10 @@ class AdyenDropInService : DropInService() {
   }
 
   override fun onPaymentsCallRequested(paymentComponentState: PaymentComponentState<*>, paymentComponentJson: JSONObject) {
-    Log.d(TAG, "onPaymentsCallRequested")
     val instance = AdyenDropInViewManager.getInstance()
     val event = RNUtils.jsonToWritableMap(paymentComponentJson)
+
+    instance?.log("onPaymentsCallRequested")
 
     if (event != null && instance != null) {
       event.putString("channel", "Android")
@@ -42,9 +43,10 @@ class AdyenDropInService : DropInService() {
   }
 
   override fun onDetailsCallRequested(actionComponentData: ActionComponentData, actionComponentJson: JSONObject) {
-    Log.d(TAG, "onDetailsCallRequested")
     val instance = AdyenDropInViewManager.getInstance()
     val event = RNUtils.jsonToWritableMap(actionComponentJson)
+
+    instance?.log("onDetailsCallRequested")
 
     if (event != null && instance != null) {
       instance.onAdditionalDetails(event, this)
