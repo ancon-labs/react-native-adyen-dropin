@@ -48,6 +48,7 @@ return (
 
 | Props                       | Type     | Description                                                    | Default |
 | --------------------------- | -------- | -------------------------------------------------------------- | ------- |
+| debug                       | boolean  | Set to `true` to enable native debugging logs                  | false   |
 | visible                     | boolean  | Whether or not the drop-in should show                         | false   |
 | paymentMethods              | object   | Payment methods response object                                | {}      |
 | paymentMethodsConfiguration | object   | Payment methods configuration object                           | {}      |
