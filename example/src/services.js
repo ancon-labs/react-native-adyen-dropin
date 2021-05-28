@@ -15,7 +15,10 @@ export const httpPost = async (url, data) => {
   const responseData = await response.json();
 
   if (response.ok) {
-    if (responseData.refusalReasonCode != null) {
+    if (
+      responseData.refusalReasonCode != null &&
+      responseData.refusalReasonCode !== '0'
+    ) {
       throw responseData;
     }
 
