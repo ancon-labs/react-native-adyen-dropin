@@ -90,7 +90,7 @@ class AdyenDropInView: UIView {
       if (visible) {
         self.open()
       } else {
-        self.close()
+        self.close(true)
       }
     }
   }
@@ -224,7 +224,7 @@ class AdyenDropInView: UIView {
     }
   }
   
-  func close() {
+  func close(_ destroy: Bool) {
     self.log("Close was called")
     
     guard !self._invalidating else {
@@ -237,9 +237,12 @@ class AdyenDropInView: UIView {
       return
     }
     
-    self._dropInComponent!.viewController.dismiss(animated: true) {
-      self._dropInComponent = nil
-      self.onClose?([:])
+    self._dropInComponent!.viewController.dismiss(animated: true) { [weak self] in
+      if (destroy) {
+        self?.log("Destroying...")
+        self?._dropInComponent = nil
+      }
+      self?.onClose?([:])
     }
   }
   
@@ -265,8 +268,9 @@ class AdyenDropInView: UIView {
   
   internal func finish(with resultCode: PaymentResultCode?) {
     let success = resultCode == .authorised || resultCode == .received || resultCode == .pending
+    self._dropInComponent?.finalizeIfNeeded(with: success)
+    self.close(false)
     if (success) {
-      self.close()
       self.onSuccess?(["resultCode": resultCode?.rawValue ?? ""])
     }
   }
@@ -328,7 +332,7 @@ extension AdyenDropInView: DropInComponentDelegate {
     if (!isCancelled) {
       self.onError?(["error": error.localizedDescription])
     }
-    self.close()
+    self.close(true)
   }
   
   func didCancel(component: PaymentComponent, from dropInComponent: DropInComponent) {
