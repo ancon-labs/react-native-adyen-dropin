@@ -236,6 +236,9 @@ class AdyenDropInView: UIView {
       self.log("Skipping close because viewController is not being presented")
       return
     }
+
+    // Close presented view controller ie. Apple Pay
+    reactViewController()?.presentedViewController?.presentedViewController?.dismiss(animated: true, completion: nil)
     
     self._dropInComponent!.viewController.dismiss(animated: true) { [weak self] in
       if (destroy) {
@@ -269,6 +272,7 @@ class AdyenDropInView: UIView {
   internal func finish(with resultCode: PaymentResultCode?) {
     let success = resultCode == .authorised || resultCode == .received || resultCode == .pending
     self._dropInComponent?.finalizeIfNeeded(with: success)
+    self._dropInComponent?.didFinalize(with: success)
     self.close(false)
     if (success) {
       self.onSuccess?(["resultCode": resultCode?.rawValue ?? ""])
