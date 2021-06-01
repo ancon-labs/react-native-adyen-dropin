@@ -56,11 +56,9 @@ struct ConfigurationParser {
         }
       }
       
-      nextConfig.applePay?.summaryItems = [summaryItem]
-      
       if let nestedConfig = applePayConfig.value(forKey: "configuration") as? NSDictionary {
         if let merchantIdentifier = nestedConfig.value(forKey: "merchantId") as? String {
-          nextConfig.applePay?.merchantIdentifier = merchantIdentifier
+          nextConfig.applePay = DropInComponent.ApplePayConfiguration(summaryItems: [summaryItem], merchantIdentifier: merchantIdentifier)
         }
       }
     }
