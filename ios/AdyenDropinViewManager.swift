@@ -276,6 +276,8 @@ class AdyenDropInView: UIView {
     self.close(false)
     if (success) {
       self.onSuccess?(["resultCode": resultCode?.rawValue ?? ""])
+    } else {
+      self.onError?(["resultCode": resultCode?.rawValue ?? ""])
     }
   }
 
