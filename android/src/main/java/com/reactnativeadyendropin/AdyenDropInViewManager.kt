@@ -43,6 +43,8 @@ class AdyenDropInViewManager(private var reactContext : ReactApplicationContext)
 
   var _service: AdyenDropInService? = null
 
+  var _open: Boolean = false
+
   // Events
   var onSuccessEmitter: (() -> Unit)? = null
   var onErrorEmitter: (() -> Unit)? = null
@@ -189,6 +191,11 @@ class AdyenDropInViewManager(private var reactContext : ReactApplicationContext)
   fun open() {
     this.log("Open was called")
 
+    if (this._open) {
+      this.log("Skipping open - _open was already true")
+      return
+    }
+
     if (this.reactContext.currentActivity == null) {
       this.log("Skipping open - currentActivity was null")
       return
@@ -211,11 +218,20 @@ class AdyenDropInViewManager(private var reactContext : ReactApplicationContext)
       this._paymentMethodsConfiguration!!,
       null
     )
+
+    this._open = true
   }
 
   fun close() {
     this.log("Close was called")
+
+    if (!this._open) {
+      this.log("Skipping close - _open was already false")
+      return
+    }
+
     this._service?.sendDropInResult(DropInServiceResult.Finished("closed"))
+    this._open = false
   }
 
   fun handleResponse(response: ReadableMap) {
@@ -336,5 +352,10 @@ class AdyenDropInViewManager(private var reactContext : ReactApplicationContext)
       "requestCode: ${requestCode}" +
       "resultCode: ${resultCode}" +
       "data: ${data?.toString() ?: "(null)"}")
+  }
+
+  override fun onCatalystInstanceDestroy() {
+    super.onCatalystInstanceDestroy()
+    this.log("onCatalystInstanceDestroy - Destroying...")
   }
 }
