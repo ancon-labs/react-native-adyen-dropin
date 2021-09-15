@@ -15,6 +15,18 @@ React Native bridge for Adyen drop-in
 yarn add @ancon/react-native-adyen-dropin
 ```
 
+### Android
+
+Add the following into your app's `/android/app/src/main/res/values/styles.xml`:
+
+```xml
+<style name="AdyenCheckout.TextInputLayout">
+  <item name="boxStrokeColor">@color/primaryColor</item>
+  <item name="hintTextColor">@color/primaryColor</item>
+  <item name="android:minHeight">@dimen/input_layout_height</item>
+</style>
+```
+
 ### iOS
 
 ```sh
