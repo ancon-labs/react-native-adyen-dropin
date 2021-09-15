@@ -44,7 +44,9 @@ struct ConfigurationParser {
     
     if let applePayConfig = config.value(forKey: "applePay") as? NSDictionary {
       let amount = NSDecimalNumber(string: String(format: "%.2f", Float(nextConfig.payment?.amount.value ?? 0) / 100))
-      let summaryItem = PKPaymentSummaryItem(label: "Total", amount: amount, type: .final)
+        
+      let label = applePayConfig.value(forKey: "label") as? String ?? "Total"
+      let summaryItem = PKPaymentSummaryItem(label: label, amount: amount, type: .final)
       
       if let amountConfig = applePayConfig.value(forKey: "amount") as? NSDictionary {
         if let applePayAmount = amountConfig.value(forKey: "value") as? Int {

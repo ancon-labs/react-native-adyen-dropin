@@ -35,6 +35,7 @@ const config = <ConfigInterface>{
   environment: 'test',
   countryCode: '<enter countryCode here>',
   applePay: {
+    label: '<enter company name here>',
     configuration: {
       merchantId: '<enter merchantId here>',
     },

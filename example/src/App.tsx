@@ -17,7 +17,7 @@ export default function App() {
   const [paymentResponse, setPaymentResponse] = useState(null);
   const [detailsResponse, setDetailsResponse] = useState(null);
 
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<unknown>(null);
   const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
@@ -102,6 +102,7 @@ export default function App() {
           environment: config.environment,
           countryCode: config.countryCode,
           applePay: {
+            label: 'Example Company',
             amount: { value: 1, currencyCode: 'SEK' },
             configuration: {
               merchantId: config.applePay?.configuration?.merchantId,
