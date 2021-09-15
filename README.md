@@ -35,6 +35,8 @@ cd ios && pod install
 
 ## Usage
 
+See example at `example/src/App.tsx`
+
 ```js
 import AdyenDropin from '@ancon/react-native-adyen-dropin';
 
