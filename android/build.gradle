@@ -11,11 +11,13 @@ buildscript {
     classpath 'com.android.tools.build:gradle:3.2.1'
     // noinspection DifferentKotlinGradleVersion
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    classpath "io.insert-koin:koin-gradle-plugin:2.2.3"
   }
 }
 
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
+apply plugin: 'koin'
 
 def getExtOrDefault(name) {
   return rootProject.ext.has(name) ? rootProject.ext.get(name) : project.properties['AdyenDropin_' + name]
@@ -128,4 +130,18 @@ dependencies {
   api 'com.facebook.react:react-native:+'
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
   implementation "com.adyen.checkout:drop-in:4.2.0"
+
+  implementation "com.squareup.okhttp3:okhttp:4.7.2"
+  implementation "com.squareup.okhttp3:logging-interceptor:4.9.0"
+
+  implementation "com.squareup.retrofit2:retrofit:2.9.0"
+  implementation "com.squareup.retrofit2:converter-moshi:2.9.0"
+  implementation "com.squareup.retrofit2:converter-gson:2.9.0"
+  implementation "com.squareup.moshi:moshi-kotlin:1.11.0"
+
+  implementation "com.jakewharton.retrofit:retrofit2-kotlin-coroutines-adapter:0.9.2"
+
+  implementation "io.insert-koin:koin-android:2.2.3"
+  implementation "io.insert-koin:koin-core:2.2.3"
+  implementation "io.insert-koin:koin-core-ext:2.2.3"
 }
