@@ -27,7 +27,6 @@ class AdyenDropInModule(private val reactContext : ReactApplicationContext): Rea
 
   init {
     reactContext.addActivityEventListener(this)
-    Logger.setLogcatLevel(VERBOSE)
   }
 
   override fun getName(): String {
@@ -36,6 +35,8 @@ class AdyenDropInModule(private val reactContext : ReactApplicationContext): Rea
 
   @ReactMethod
   fun setDropInConfig(config: ReadableMap?) {
+    Log.d(TAG, "Called setDropInConfig")
+
     if (config == null) {
       rejectCallback?.invoke("setDropInConfig was called without a config object")
     } else {
@@ -77,7 +78,7 @@ class AdyenDropInModule(private val reactContext : ReactApplicationContext): Rea
 
   @ReactMethod
   fun setModuleConfig(config: ReadableMap?) {
-    Log.d(TAG, "Received module config")
+    Log.d(TAG, "Called setModuleConfig")
 
     if (config == null) {
       rejectCallback?.invoke("setModuleConfig was called without a config object")
@@ -85,6 +86,14 @@ class AdyenDropInModule(private val reactContext : ReactApplicationContext): Rea
       try {
         if (config.hasKey("baseUrl")) {
           memoryStorage.baseUrl = config.getString("baseUrl")!!
+        }
+
+        if (config.hasKey("debug")) {
+          val debug = config.getBoolean("debug")
+          if (debug is Boolean) {
+            memoryStorage.debug = debug
+            Logger.setLogcatLevel(VERBOSE)
+          }
         }
 
         if (config.hasKey("headers")) {
@@ -107,7 +116,7 @@ class AdyenDropInModule(private val reactContext : ReactApplicationContext): Rea
 
   @ReactMethod
   fun start(paymentMethodsResponse: ReadableMap, resolveCallback: Callback, rejectCallback: Callback) {
-    Log.d(TAG, "Received paymentMethodsResponse")
+    Log.d(TAG, "Called start")
 
     if (this.dropInConfiguration == null) {
       rejectCallback.invoke("start was called without dropInConfig being set")

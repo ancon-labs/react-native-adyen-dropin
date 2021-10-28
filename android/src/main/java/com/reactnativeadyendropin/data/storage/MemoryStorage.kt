@@ -33,6 +33,7 @@ class MemoryStorage {
 
   // RN module related
   var baseUrl: String = DEFAULT_BASE_URL
+  var debug: Boolean = false
   var headers: Map<String, String> = mutableMapOf()
   var makePaymentEndpoint: String = DEFAULT_PAYMENT_ENDPOINT
   var makeDetailsCallEndpoint: String = DEFAULT_DETAILS_ENDPOINT
