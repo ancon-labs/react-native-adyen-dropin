@@ -18,7 +18,6 @@ export type ApplePayConfiguration = {
   /** Label to show instead of "Total" */
   label?: string;
   amount?: Amount;
-  countryCode?: string;
   configuration?: {
     /** Name to be displayed on the form */
     merchantName?: string;
@@ -44,6 +43,10 @@ export type ModuleConfig = {
    * "http://server.com/api/"
    */
   baseUrl: string;
+  /**
+   * Set to `true` to view more native logs
+   */
+  debug?: boolean;
   /** Optional custom headers to add to requests */
   headers?: {
     [key: string]: string;
@@ -190,8 +193,8 @@ const AdyenDropIn = {
         }
       };
 
-      const rejectCallback = (jsonStr?: string) => {
-        return reject(new Error(jsonStr ?? 'Unknown error'));
+      const rejectCallback = (msg?: string) => {
+        return reject(new Error(msg ?? 'Unknown error'));
       };
 
       try {
