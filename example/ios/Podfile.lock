@@ -1,28 +1,30 @@
 PODS:
-  - Adyen (4.0.0-beta.2):
-    - Adyen/Actions (= 4.0.0-beta.2)
-    - Adyen/Card (= 4.0.0-beta.2)
-    - Adyen/Components (= 4.0.0-beta.2)
-    - Adyen/Core (= 4.0.0-beta.2)
-    - Adyen/DropIn (= 4.0.0-beta.2)
-    - Adyen/Encryption (= 4.0.0-beta.2)
-  - Adyen/Actions (4.0.0-beta.2):
+  - Adyen (4.3.0):
+    - Adyen/Actions (= 4.3.0)
+    - Adyen/Card (= 4.3.0)
+    - Adyen/Components (= 4.3.0)
+    - Adyen/Core (= 4.3.0)
+    - Adyen/DropIn (= 4.3.0)
+    - Adyen/Encryption (= 4.3.0)
+  - Adyen/Actions (4.3.0):
     - Adyen/Core
-    - Adyen3DS2 (= 2.2.1)
-  - Adyen/Card (4.0.0-beta.2):
+    - Adyen3DS2 (= 2.2.3)
+  - Adyen/Card (4.3.0):
     - Adyen/Core
     - Adyen/Encryption
-  - Adyen/Components (4.0.0-beta.2):
+  - Adyen/Components (4.3.0):
     - Adyen/Core
-  - Adyen/Core (4.0.0-beta.2)
-  - Adyen/DropIn (4.0.0-beta.2):
+  - Adyen/Core (4.3.0):
+    - AdyenNetworking (= 1.0.0)
+  - Adyen/DropIn (4.3.0):
     - Adyen/Actions
     - Adyen/Card
     - Adyen/Components
     - Adyen/Core
     - Adyen/Encryption
-  - Adyen/Encryption (4.0.0-beta.2)
-  - Adyen3DS2 (2.2.1)
+  - Adyen/Encryption (4.3.0)
+  - Adyen3DS2 (2.2.3)
+  - AdyenNetworking (1.0.0)
   - boost-for-react-native (1.63.0)
   - DoubleConversion (1.1.6)
   - FBLazyVector (0.63.4)
@@ -209,8 +211,8 @@ PODS:
     - React-cxxreact (= 0.63.4)
     - React-jsi (= 0.63.4)
   - React-jsinspector (0.63.4)
-  - react-native-adyen-dropin (0.4.6):
-    - Adyen (= 4.0.0-beta.2)
+  - react-native-adyen-dropin (0.5.0):
+    - Adyen (= 4.3.0)
     - React-Core
   - React-RCTActionSheet (0.63.4):
     - React-Core/RCTActionSheetHeaders (= 0.63.4)
@@ -309,6 +311,7 @@ SPEC REPOS:
   trunk:
     - Adyen
     - Adyen3DS2
+    - AdyenNetworking
     - boost-for-react-native
 
 EXTERNAL SOURCES:
@@ -368,8 +371,9 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
-  Adyen: dadee32d621909c61ea990beac8ed95296cd2980
-  Adyen3DS2: d99e5dea8524fc860751804dd760f6bad032de01
+  Adyen: f84f1d7e1641464d5ba4a6fb0cd726acc6719dff
+  Adyen3DS2: c62a18a596783ebf0559dd09108994eb1910c9c6
+  AdyenNetworking: 14567bd00c00ba2e2580a904708c7ba5f010b1f9
   boost-for-react-native: 39c7adb57c4e60d6c5479dd8623128eb5b3f0f2c
   DoubleConversion: cde416483dac037923206447da6e1454df403714
   FBLazyVector: 3bb422f41b18121b71783a905c10e58606f7dc3e
@@ -386,7 +390,7 @@ SPEC CHECKSUMS:
   React-jsi: a0418934cf48f25b485631deb27c64dc40fb4c31
   React-jsiexecutor: 93bd528844ad21dc07aab1c67cb10abae6df6949
   React-jsinspector: 58aef7155bc9a9683f5b60b35eccea8722a4f53a
-  react-native-adyen-dropin: 70f739542b1e66dc392267d9cccfac6c1d0e6d2c
+  react-native-adyen-dropin: c61fc2ab5a9ef89a7c0a471f0edc928cffcae3ff
   React-RCTActionSheet: 89a0ca9f4a06c1f93c26067af074ccdce0f40336
   React-RCTAnimation: 1bde3ecc0c104c55df246eda516e0deb03c4e49b
   React-RCTBlob: a97d378b527740cc667e03ebfa183a75231ab0f0
@@ -401,4 +405,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 4f09c334390a4d501933237ecd766ecb728842f7
 
-COCOAPODS: 1.10.2
+COCOAPODS: 1.11.2

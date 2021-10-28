@@ -11,6 +11,7 @@ import com.facebook.soloader.SoLoader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import com.reactnativeadyendropin.AdyenDropInPackage;
+import static com.reactnativeadyendropin.AdyenDropIn.setup;
 
 public class MainApplication extends Application implements ReactApplication {
 
@@ -47,6 +48,7 @@ public class MainApplication extends Application implements ReactApplication {
     super.onCreate();
     SoLoader.init(this, /* native exopackage */ false);
     initializeFlipper(this, getReactNativeHost().getReactInstanceManager()); // Remove this line if you don't want Flipper enabled
+    setup(this);
   }
 
   /**
