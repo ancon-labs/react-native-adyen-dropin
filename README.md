@@ -27,52 +27,123 @@ Add the following into your app's `/android/app/src/main/res/values/styles.xml`:
 </style>
 ```
 
+Add the following into your app's `MainApplication.java`:
+
+```java
+import static com.reactnativeadyendropin.AdyenDropIn.setup;
+
+@Override
+public void onCreate() {
+  super.onCreate();
+  SoLoader.init(this, /* native exopackage */ false);
+  initializeFlipper(this, getReactNativeHost().getReactInstanceManager());
+  // ADD setup(this); in onCreate()
+  setup(this);
+}
+```
+
 ### iOS
+
+Install pods:
 
 ```sh
 cd ios && pod install
+```
+
+Add this to your project's swift file to be able to handle redirect actions (or create one and generate a bridging header file):
+
+```swift
+import Foundation
+import Adyen
+
+@objc class AdyenObjectiveCBridge: NSObject {
+
+  @objc(applicationDidOpenURL:)
+  static func applicationDidOpen(_ url: URL) -> Bool {
+     let adyenHandled = RedirectComponent.applicationDidOpen(from : url)
+     return adyenHandled
+  }
+}
 ```
 
 ## Usage
 
 See example at `example/src/App.tsx`
 
-```js
-import AdyenDropin from '@ancon/react-native-adyen-dropin';
+```tsx
+import AdyenDropIn, {
+  isCancelledError,
+  isRefusedResult,
+  PaymentResult,
+} from '@ancon/react-native-adyen-dropin';
 
 // ...
 
-return (
-  <AdyenDropIn
-    visible={visible}
-    paymentMethods={paymentMethods}
-    paymentMethodsConfiguration={paymentMethodsConfiguration}
-    paymentResponse={paymentResponse}
-    detailsResponse={detailsResponse}
-    onSubmit={handleSubmit}
-    onAdditionalDetails={handleAdditionalDetails}
-    onError={handleError}
-    onSuccess={handleSuccess}
-    onClose={handleClose}
-  />
-);
+async function handlePress() {
+  if (!loading) {
+    setLoading(true);
+
+    const adyenDropIn = AdyenDropIn.setModuleConfig({
+      // Required API base URL
+      baseUrl: 'http://192.168.1.74:3000/api/',
+      // Optional to view more native logs
+      debug: true,
+      // Optional custom headers
+      headers: {
+        Authorization: 'Bearer 123',
+      },
+      // Optional custom endpoints
+      endpoints: {
+        makePayment: '/payments',
+        makeDetailsCall: '/details',
+      },
+    }).setDropInConfig({
+      // Required
+      clientKey: config.clientKey,
+      // Required
+      environment: config.environment,
+      // Required
+      countryCode: config.countryCode,
+      // Required
+      amount: { value: 100, currencyCode: 'SEK' },
+      // Optional
+      applePay: {
+        label: 'Example Company',
+        amount: { value: 1, currencyCode: 'SEK' },
+        configuration: {
+          merchantId: config.applePay?.configuration?.merchantId,
+        },
+      },
+    });
+
+    // Fetch payment methods
+    const response = await services.getPaymentMethods();
+
+    // Start the drop-in flow
+    adyenDropIn
+      .start(response)
+      .then((res: PaymentResult) => {
+        if (isRefusedResult(res)) {
+          Alert.alert('Refused', `Payment refused: ${res.refusalReason}`);
+        } else {
+          Alert.alert('Success', `Payment success: ${res.resultCode}`);
+        }
+      })
+      .catch((err: Error) => {
+        if (isCancelledError(err)) {
+          console.log('Cancelled');
+        } else {
+          Alert.alert('Error', `Payment error: ${err.message}`);
+        }
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }
+}
+
+// ...
 ```
-
-## Props
-
-| Props                       | Type     | Description                                                    | Default |
-| --------------------------- | -------- | -------------------------------------------------------------- | ------- |
-| debug                       | boolean  | Set to `true` to enable native debugging logs                  | false   |
-| visible                     | boolean  | Whether or not the drop-in should show                         | false   |
-| paymentMethods              | object   | Payment methods response object                                | {}      |
-| paymentMethodsConfiguration | object   | Payment methods configuration object                           | {}      |
-| paymentResponse             | object   | Payment response object (onSubmit request)                     |         |
-| detailsResponse             | object   | Details response object (onAdditionalDetails request)          |         |
-| onSubmit                    | function | Callback with data when making a new payment                   |         |
-| onAdditionalDetails         | function | Callback with data when an action is required                  |         |
-| onError                     | function | Callback with error (if available) on error or payment failure |         |
-| onSuccess                   | function | Callback with resultCode on payment success                    |         |
-| onClose                     | function | Callback when the drop-in was closed                           |         |
 
 ## Contributing
 
