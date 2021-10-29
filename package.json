@@ -104,7 +104,16 @@
     },
     "plugins": {
       "@release-it/conventional-changelog": {
-        "preset": "angular"
+        "preset": {
+          "name": "angular",
+          "types": [
+            {
+              "type": "refactor",
+              "hidden": false,
+              "section": "Refactor"
+            }
+          ]
+        }
       }
     }
   },
