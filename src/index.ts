@@ -34,6 +34,7 @@ export type DropInConfiguration = {
   /** @todo NOT IMPLEMENTED */
   card?: CardConfiguration;
   applePay?: ApplePayConfiguration;
+  returnUrl?: string;
 };
 
 export type ModuleConfig = {
@@ -91,6 +92,13 @@ export type PaymentResult = {
 
 export type PaymentPromise = Promise<PaymentResult>;
 
+export enum RESULT_CODE {
+  cancelled = 'cancelled',
+  refused = 'refused',
+  error = 'error',
+  received = 'received',
+}
+
 export const AdyenDropInModule = NativeModules.AdyenDropInModule;
 
 export function isCancelledError(err: unknown): boolean {
@@ -101,12 +109,27 @@ export function isCancelledError(err: unknown): boolean {
   return err === 'Cancelled';
 }
 
-export function isRefusedResult(result: PaymentResult): boolean {
-  return (
-    result.refusalReasonCode !== undefined &&
-    result.refusalReasonCode !== null &&
-    result.refusalReasonCode !== '0'
-  );
+/**
+ * Check if a payment result is considered successful
+ * @param result Resolved payment promise result
+ * @returns Whether or not the result is considered successful
+ */
+export function isSuccessResult(result: PaymentResult): boolean {
+  if (typeof result.resultCode === 'string') {
+    switch (result.resultCode.toLowerCase?.()) {
+      case RESULT_CODE.cancelled:
+      case RESULT_CODE.refused:
+      case RESULT_CODE.error:
+        return false;
+
+      default:
+        return true;
+    }
+  }
+
+  if (result.errorCode) return false;
+
+  return false;
 }
 
 function trimStartingSlash(str?: string): string {
