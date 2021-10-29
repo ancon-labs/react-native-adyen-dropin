@@ -9,6 +9,7 @@ import com.adyen.checkout.core.util.LocaleUtil
 import com.adyen.checkout.dropin.DropInConfiguration
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReadableMap
+import com.reactnativeadyendropin.service.AdyenDropInService
 import org.json.JSONObject
 import java.util.*
 
@@ -16,7 +17,7 @@ class ConfigurationParser(private val clientKey: String, context: ReactApplicati
 
   private val context: Context = context
 
-  private  fun getShopperLocale(config: ReadableMap): Locale {
+  private fun getShopperLocale(config: ReadableMap): Locale {
     val providedShopperLocale = config.getString("shopperLocale")
 
     if (providedShopperLocale != null) {
@@ -52,12 +53,22 @@ class ConfigurationParser(private val clientKey: String, context: ReactApplicati
     return Amount()
   }
 
+  fun getShopperReference(config: ReadableMap): String {
+    if (config.hasKey("shopperReference")) {
+      return config.getString("shopperReference")!!
+    }
+
+    return "${this.context.packageName}_${System.currentTimeMillis()}"
+  }
+
   fun parse(config: ReadableMap): DropInConfiguration {
     val shopperLocale = this.getShopperLocale(config)
     val environment = this.getEnvironment(config)
     val amount = this.getAmount(config)
+    val shopperReference = this.getShopperReference(config)
+
     val cardConfiguration = CardConfiguration.Builder(shopperLocale, environment, this.clientKey)
-      .setShopperReference("test")
+      .setShopperReference(shopperReference)
       .setSupportedCardTypes(CardType.MASTERCARD, CardType.VISA)
       .build()
 

@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { Alert, Button } from 'react-native';
-
-import { StyleSheet, View } from 'react-native';
-import AdyenDropIn from '@ancon/react-native-adyen-dropin';
+import React, { useState } from 'react';
+import AdyenDropIn, {
+  isCancelledError,
+  isSuccessResult,
+  PaymentResult,
+} from '@ancon/react-native-adyen-dropin';
+import { StyleSheet, View, Button, Alert } from 'react-native';
 
 const { default: config } = __DEV__
   ? require('../config')
@@ -12,113 +14,75 @@ const { default: config } = __DEV__
 import * as services from './services';
 
 export default function App() {
-  const [visible, setVisible] = useState(false);
-  const [paymentMethods, setPaymentMethods] = useState(null);
-  const [paymentResponse, setPaymentResponse] = useState(null);
-  const [detailsResponse, setDetailsResponse] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const [error, setError] = useState<unknown>(null);
-  const [isClosing, setIsClosing] = useState(false);
+  async function handlePress() {
+    if (!loading) {
+      setLoading(true);
 
-  useEffect(() => {
-    async function init() {
-      try {
-        const response = await services.getPaymentMethods();
-        setPaymentMethods(response);
-      } catch (err) {
-        setError(err);
-      }
-    }
-
-    init();
-  }, []);
-
-  useEffect(() => {
-    if (error && !visible) {
-      console.log('Show error', error);
-      Alert.alert(
-        'Payment failure',
-        JSON.stringify(error ?? {}, undefined, 2),
-        [
-          {
-            onPress: () => setError(null),
+      const adyenDropIn = AdyenDropIn.setModuleConfig({
+        // Required
+        baseUrl: 'http://192.168.1.74:3000/api/',
+        // Optional
+        debug: true,
+        // Optional
+        headers: {
+          Authorization: 'Bearer 123',
+        },
+        // Optional
+        endpoints: {
+          makePayment: '/payments',
+          makeDetailsCall: '/details',
+        },
+      }).setDropInConfig({
+        // Required
+        clientKey: config.clientKey,
+        // Required
+        environment: config.environment,
+        // Required
+        countryCode: config.countryCode,
+        // Required
+        amount: { value: 100, currencyCode: 'SEK' },
+        // Optional
+        applePay: {
+          label: 'Example Company',
+          amount: { value: 1, currencyCode: 'SEK' },
+          configuration: {
+            merchantId: config.applePay?.configuration?.merchantId,
           },
-        ]
-      );
+        },
+      });
+
+      const response = await services.getPaymentMethods();
+
+      adyenDropIn
+        .start(response)
+        .then((res: PaymentResult) => {
+          console.log('result:');
+          console.log(res);
+          if (isSuccessResult(res)) {
+            Alert.alert('Success', `Payment success: ${res.resultCode}`);
+          } else {
+            Alert.alert('Refused', `Payment refused: ${res.refusalReason}`);
+          }
+        })
+        .catch((err: Error) => {
+          if (isCancelledError(err)) {
+            console.log('Cancelled');
+          } else {
+            Alert.alert('Error', `Payment error: ${err.message}`);
+            console.error(err);
+          }
+        })
+        .finally(() => {
+          setLoading(false);
+        });
     }
-  }, [error, visible]);
-
-  async function handleSubmit(data: any) {
-    try {
-      console.log('running handleSubmit');
-      console.log(data);
-      const response = await services.makePayment(data);
-      console.log('handleSubmit response');
-      console.log(response);
-      setPaymentResponse(response);
-    } catch (err) {
-      setIsClosing(true);
-      setError(err);
-    }
-  }
-
-  async function handleAdditionalDetails(data: any) {
-    try {
-      console.log('running handleAdditionalDetails');
-      console.log(data);
-      const response = await services.makeDetailsCall(data);
-      console.log('handleAdditionalDetails response');
-      console.log(response);
-      setDetailsResponse(response);
-    } catch (err) {
-      setIsClosing(true);
-      setError(err);
-    }
-  }
-
-  function handleError(data: any) {
-    console.log('handleError', data);
-    setError(data);
-  }
-
-  function handleSuccess(data: any) {
-    console.log('handleSuccess', data);
-    Alert.alert('Payment success', JSON.stringify(data ?? {}, undefined, 2));
-  }
-
-  function handleClose() {
-    setVisible(false);
-    setIsClosing(false);
   }
 
   return (
     <View style={styles.container}>
-      <AdyenDropIn
-        debug={__DEV__}
-        visible={isClosing === true ? false : visible}
-        paymentMethods={paymentMethods}
-        paymentMethodsConfiguration={{
-          clientKey: config.clientKey,
-          environment: config.environment,
-          countryCode: config.countryCode,
-          applePay: {
-            label: 'Example Company',
-            amount: { value: 1, currencyCode: 'SEK' },
-            configuration: {
-              merchantId: config.applePay?.configuration?.merchantId,
-            },
-          },
-          amount: { value: 100, currencyCode: 'SEK' },
-        }}
-        paymentResponse={paymentResponse}
-        detailsResponse={detailsResponse}
-        onSubmit={handleSubmit}
-        onAdditionalDetails={handleAdditionalDetails}
-        onError={handleError}
-        onSuccess={handleSuccess}
-        onClose={handleClose}
-      />
-      <Button title="Start payment" onPress={() => setVisible(true)} />
+      <Button disabled={loading} title="Start payment" onPress={handlePress} />
     </View>
   );
 }

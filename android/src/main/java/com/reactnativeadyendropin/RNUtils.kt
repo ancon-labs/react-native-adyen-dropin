@@ -1,9 +1,6 @@
 package com.reactnativeadyendropin
 
-import com.facebook.react.bridge.WritableArray
-import com.facebook.react.bridge.WritableMap
-import com.facebook.react.bridge.WritableNativeArray
-import com.facebook.react.bridge.WritableNativeMap
+import com.facebook.react.bridge.*
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -75,6 +72,52 @@ class RNUtils {
         }
       }
       return writableArray
+    }
+
+    fun convertArrayToJson(readableArray: ReadableArray?): JSONArray {
+      val array = JSONArray()
+      for (i in 0 until readableArray!!.size()) {
+        when (readableArray.getType(i)) {
+          ReadableType.Null -> {
+          }
+          ReadableType.Boolean -> array.put(readableArray.getBoolean(i))
+          ReadableType.Number -> array.put(readableArray.getDouble(i))
+          ReadableType.String -> array.put(readableArray.getString(i))
+          ReadableType.Map -> array.put(convertMapToJson(readableArray.getMap(i)))
+          ReadableType.Array -> array.put(convertArrayToJson(readableArray.getArray(i)))
+        }
+      }
+      return array
+    }
+
+    fun convertMapToJson(readableMap: ReadableMap?): JSONObject {
+      val obj = JSONObject()
+      val iterator = readableMap!!.keySetIterator()
+      while (iterator.hasNextKey()) {
+        val key = iterator.nextKey()
+        when (readableMap.getType(key)) {
+          ReadableType.Null -> obj.put(key, JSONObject.NULL)
+          ReadableType.Boolean -> obj.put(key, readableMap.getBoolean(key))
+          ReadableType.Number -> obj.put(key, readableMap.getDouble(key))
+          ReadableType.String -> obj.put(key, readableMap.getString(key))
+          ReadableType.Map -> obj.put(key, convertMapToJson(readableMap.getMap(key)))
+          ReadableType.Array -> obj.put(key, convertArrayToJson(readableMap.getArray(key)))
+        }
+      }
+      return obj
+    }
+
+    fun readableMapToStringMap(readableMap: ReadableMap): Map<String, String> {
+      val out = mutableMapOf<String, String>()
+      val iterator = readableMap.keySetIterator()
+      while (iterator.hasNextKey()) {
+        val key = iterator.nextKey()
+        if (readableMap.getType(key) == ReadableType.String) {
+          out[key] = readableMap.getString(key)!!
+        }
+      }
+
+      return out
     }
   }
 }

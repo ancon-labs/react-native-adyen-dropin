@@ -378,7 +378,7 @@
 			);
 			inputPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-AdyenDropinExample/Pods-AdyenDropinExample-frameworks.sh",
-				"${PODS_ROOT}/Adyen3DS2/Dynamic/Adyen3DS2.framework",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/Adyen3DS2/Adyen3DS2.framework/Adyen3DS2",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
