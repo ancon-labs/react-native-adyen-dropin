@@ -17,28 +17,59 @@ yarn add @ancon/react-native-adyen-dropin
 
 ### Android
 
-Add the following into your app's `/android/app/src/main/res/values/styles.xml`:
+Add Kotlin v1.5 as a dependency in `android/build.gradle`:
 
-```xml
-<style name="AdyenCheckout.TextInputLayout">
-  <item name="boxStrokeColor">@color/primaryColor</item>
-  <item name="hintTextColor">@color/primaryColor</item>
-  <item name="android:minHeight">@dimen/input_layout_height</item>
-</style>
+```diff
+buildscript {
+  ext {
+    buildToolsVersion           = "30.0.0"
+    minSdkVersion               = 21
+    compileSdkVersion           = 30
+    targetSdkVersion            = 30
++    kotlinVersion               = "1.5.31"
+  }
 ```
 
-Add the following into your app's `MainApplication.java`:
+Add Kotlin as a dependency in `android/app/build.gradle`
 
-```java
-import static com.reactnativeadyendropin.AdyenDropIn.setup;
+```diff
+dependencies {
+  implementation fileTree(dir: "libs", include: ["*.jar"])
+  //noinspection GradleDynamicVersion
+  implementation("com.facebook.react:react-native:+")
 
++  implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
+}
+```
+
+Add the following into `/android/app/src/main/res/values/styles.xml`:
+
+```diff
+<resources>
+  <!-- Base application theme. -->
+  <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+      <!-- Customize your theme here. -->
+      <item name="android:textColor">#000000</item>
+  </style>
++  <style name="AdyenCheckout.TextInputLayout">
++    <item name="boxStrokeColor">@color/primaryColor</item>
++    <item name="hintTextColor">@color/primaryColor</item>
++    <item name="android:minHeight">@dimen/input_layout_height</item>
++  </style>
+</resources>
+```
+
+Add the following into `onCreate()` in `MainApplication.java`:
+
+```diff
++import static com.reactnativeadyendropin.AdyenDropIn.setup;
+// ...
 @Override
 public void onCreate() {
   super.onCreate();
   SoLoader.init(this, /* native exopackage */ false);
   initializeFlipper(this, getReactNativeHost().getReactInstanceManager());
-  // ADD setup(this); in onCreate()
-  setup(this);
++  setup(this);
 }
 ```
 
