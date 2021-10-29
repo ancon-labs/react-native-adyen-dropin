@@ -154,7 +154,7 @@ class AdyenDropInModule(private val reactContext : ReactApplicationContext): Rea
 
   override fun onActivityResult(activity: Activity?, requestCode: Int, resultCode: Int, data: Intent?) {
     Log.d(TAG, "onActivityResult - ${activity}, ${requestCode}, ${resultCode}, ${data}")
-    
+
     val dropInResult = DropIn.handleActivityResult(requestCode, resultCode, data) ?: return
     when (dropInResult) {
       is DropInResult.Error -> handleError(dropInResult.reason)
@@ -165,7 +165,7 @@ class AdyenDropInModule(private val reactContext : ReactApplicationContext): Rea
         try {
           val json = JSONObject(dropInResult.result)
           if (json.getStringOrNull("resultCode") == null) {
-            handleError(json ?: json.getStringOrNull("message") ?: json.getStringOrNull("refusalReason") ?: "Unknown error")
+            handleError(dropInResult.result ?: json.getStringOrNull("message") ?: json.getStringOrNull("refusalReason") ?: "Unknown error")
           } else {
              handleFinished(dropInResult.result)
           }
