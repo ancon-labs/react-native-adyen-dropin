@@ -47,7 +47,8 @@ internal struct PaymentsRequest: Request {
         try container.encodeIfPresent(data.deliveryAddress, forKey: .deliveryAddress)
         try container.encodeIfPresent(data.socialSecurityNumber, forKey: .socialSecurityNumber)
         try container.encode(storage.shopperLocale, forKey: .shopperLocale)
-        try container.encodeIfPresent(data.browserInfo, forKey: .browserInfo)
+        // BrowserInfo does not provide all required info, disable
+        // try container.encodeIfPresent(data.browserInfo, forKey: .browserInfo)
         try container.encode("iOS", forKey: .channel)
         try container.encode(amount, forKey: .amount)
         try container.encode(storage.countryCode, forKey: .countryCode)
@@ -71,7 +72,7 @@ internal struct PaymentsRequest: Request {
         case shopperEmail
         case additionalData
         case merchantAccount
-        case browserInfo
+        // case browserInfo
         case shopperName
         case telephoneNumber
         case shopperLocale
