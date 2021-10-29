@@ -16,6 +16,11 @@ class AdyenDropInModule: NSObject {
     
     // MARK: - RN module
     
+    @objc
+    static func requiresMainQueueSetup() -> Bool {
+      return true
+    }
+    
     func resolve(_ arg: Any) {
         resolveCallback?.self([arg])
     }
@@ -96,12 +101,14 @@ class AdyenDropInModule: NSObject {
             MemoryStorage.current.headers = headers
         }
         
-        if let makePaymentEndpoint = config?["makePaymentEndpoint"] as? String {
-            MemoryStorage.current.makePaymentEndpoint = makePaymentEndpoint
-        }
-        
-        if let makeDetailsCallEndpoint = config?["makeDetailsCallEndpoint"] as? String {
-            MemoryStorage.current.makeDetailsCallEndpoint = makeDetailsCallEndpoint
+        if let endpoints = config?["endpoints"] as? NSDictionary {
+            if let makePaymentEndpoint = endpoints["makePayment"] as? String {
+                MemoryStorage.current.makePaymentEndpoint = makePaymentEndpoint
+            }
+            
+            if let makeDetailsCallEndpoint = endpoints["makeDetailsCall"] as? String {
+                MemoryStorage.current.makeDetailsCallEndpoint = makeDetailsCallEndpoint
+            }
         }
     }
     
@@ -203,7 +210,7 @@ class AdyenDropInModule: NSObject {
                 }
             } else if let paymentsErrorResponse = error as? PaymentsErrorResponse {
                 if (paymentsErrorResponse.resultCode == nil) {
-                    self?.reject((paymentsErrorResponse.message ?? error.localizedDescription) as Any)
+                    self?.reject((paymentsErrorResponse.message ?? paymentsErrorResponse.refusalReason ?? error.localizedDescription) as Any)
                 // Finished with refused etc
                 } else if let jsonObject = try? JSONEncoder().encode(paymentsErrorResponse) {
                     let str = String(data: jsonObject, encoding: .utf8)
