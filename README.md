@@ -9,6 +9,9 @@
 
 React Native bridge for Adyen drop-in
 
+🍏 Adyen iOS SDK v4.3.0
+🤖 Adyen Android SDK v4.2.0
+
 ## Installation
 
 ```sh
