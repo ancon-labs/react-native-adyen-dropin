@@ -6,11 +6,13 @@ import android.util.Log
 import android.util.Log.VERBOSE
 import com.adyen.checkout.components.model.PaymentMethodsApiResponse
 import com.adyen.checkout.core.log.Logger
+import com.adyen.checkout.core.model.getStringOrNull
 import com.adyen.checkout.dropin.DropIn
 import com.adyen.checkout.dropin.DropInConfiguration
 import com.adyen.checkout.dropin.DropInResult
 import com.facebook.react.bridge.*
 import com.reactnativeadyendropin.data.storage.MemoryStorage
+import org.json.JSONObject
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 
@@ -152,11 +154,26 @@ class AdyenDropInModule(private val reactContext : ReactApplicationContext): Rea
 
   override fun onActivityResult(activity: Activity?, requestCode: Int, resultCode: Int, data: Intent?) {
     Log.d(TAG, "onActivityResult - ${activity}, ${requestCode}, ${resultCode}, ${data}")
+    
     val dropInResult = DropIn.handleActivityResult(requestCode, resultCode, data) ?: return
     when (dropInResult) {
       is DropInResult.Error -> handleError(dropInResult.reason)
       is DropInResult.CancelledByUser -> handleCancelled()
-      is DropInResult.Finished -> handleFinished(dropInResult.result)
+      is DropInResult.Finished -> {
+        Log.d(TAG, "dropInResult - ${dropInResult.result}")
+
+        try {
+          val json = JSONObject(dropInResult.result)
+          if (json.getStringOrNull("resultCode") == null) {
+            handleError(json.getStringOrNull("message") ?: json.getStringOrNull("refusalReason") ?: "Unknown error")
+          } else {
+             handleFinished(dropInResult.result)
+          }
+        } catch (err: Error) {
+          Log.e(TAG, err.message ?: "Unknown parsing error")
+          handleFinished(dropInResult.result)
+        }
+      }
     }
   }
 
