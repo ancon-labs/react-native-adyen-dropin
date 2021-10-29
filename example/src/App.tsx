@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import AdyenDropIn, {
   isCancelledError,
-  isRefusedResult,
+  isSuccessResult,
   PaymentResult,
 } from '@ancon/react-native-adyen-dropin';
 import { StyleSheet, View, Button, Alert } from 'react-native';
@@ -60,10 +60,10 @@ export default function App() {
         .then((res: PaymentResult) => {
           console.log('result:');
           console.log(res);
-          if (isRefusedResult(res)) {
-            Alert.alert('Refused', `Payment refused: ${res.refusalReason}`);
-          } else {
+          if (isSuccessResult(res)) {
             Alert.alert('Success', `Payment success: ${res.resultCode}`);
+          } else {
+            Alert.alert('Refused', `Payment refused: ${res.refusalReason}`);
           }
         })
         .catch((err: Error) => {
