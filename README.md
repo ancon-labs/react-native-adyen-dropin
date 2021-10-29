@@ -73,7 +73,7 @@ See example at `example/src/App.tsx`
 ```tsx
 import AdyenDropIn, {
   isCancelledError,
-  isRefusedResult,
+  isSuccessResult,
   PaymentResult,
 } from '@ancon/react-native-adyen-dropin';
 
@@ -123,10 +123,10 @@ async function handlePress() {
     adyenDropIn
       .start(response)
       .then((res: PaymentResult) => {
-        if (isRefusedResult(res)) {
-          Alert.alert('Refused', `Payment refused: ${res.refusalReason}`);
-        } else {
+        if (isSuccessResult(res)) {
           Alert.alert('Success', `Payment success: ${res.resultCode}`);
+        } else {
+          Alert.alert('Refused', `Payment refused: ${res.refusalReason}`);
         }
       })
       .catch((err: Error) => {
