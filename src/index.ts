@@ -216,8 +216,31 @@ const AdyenDropIn = {
         }
       };
 
-      const rejectCallback = (msg?: string) => {
-        return reject(new Error(msg ?? 'Unknown error'));
+      const rejectCallback = (msgOrJsonStr?: string) => {
+        if (msgOrJsonStr) {
+          try {
+            const parsed = JSON.parse(msgOrJsonStr);
+            const parsedEntries = Object.entries(parsed);
+            const hasOnlyMessage =
+              parsedEntries.length === 1 &&
+              typeof parsed.message === 'string' &&
+              parsed.message.length > 0;
+
+            if (hasOnlyMessage) {
+              return reject(new Error(parsed.message));
+            } else {
+              const { message } = parsed;
+              const error = new Error(
+                message ?? parsed.refusalReason ?? 'Unknown error'
+              );
+              parsedEntries.forEach(([key, value]) => {
+                Object.defineProperty(error, key, { value });
+              });
+              return reject(error);
+            }
+          } catch {}
+        }
+        return reject(new Error(msgOrJsonStr ?? 'Unknown error'));
       };
 
       try {

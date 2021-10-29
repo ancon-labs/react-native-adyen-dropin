@@ -165,7 +165,7 @@ class AdyenDropInModule(private val reactContext : ReactApplicationContext): Rea
         try {
           val json = JSONObject(dropInResult.result)
           if (json.getStringOrNull("resultCode") == null) {
-            handleError(json.getStringOrNull("message") ?: json.getStringOrNull("refusalReason") ?: "Unknown error")
+            handleError(json ?: json.getStringOrNull("message") ?: json.getStringOrNull("refusalReason") ?: "Unknown error")
           } else {
              handleFinished(dropInResult.result)
           }

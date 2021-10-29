@@ -210,7 +210,14 @@ class AdyenDropInModule: NSObject {
                 }
             } else if let paymentsErrorResponse = error as? PaymentsErrorResponse {
                 if (paymentsErrorResponse.resultCode == nil) {
-                    self?.reject((paymentsErrorResponse.message ?? paymentsErrorResponse.refusalReason ?? error.localizedDescription) as Any)
+                    // Try to create JSON object for error
+                    if let jsonObject = try? JSONEncoder().encode(paymentsErrorResponse) {
+                        let str = String(data: jsonObject, encoding: .utf8)
+                        self?.reject(str as Any)
+                    } else {
+                    // If couldn't create JSON object, send just the message string
+                        self?.reject((paymentsErrorResponse.message ?? paymentsErrorResponse.refusalReason ?? error.localizedDescription) as Any)
+                    }
                 // Finished with refused etc
                 } else if let jsonObject = try? JSONEncoder().encode(paymentsErrorResponse) {
                     let str = String(data: jsonObject, encoding: .utf8)
