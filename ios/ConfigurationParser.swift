@@ -50,6 +50,12 @@ struct ConfigurationParser {
             }
         }
         
+        if let cardConfig = config.value(forKey: "card") as? NSDictionary {
+            nextConfig.card.showsHolderNameField = cardConfig.value(forKey: "showsHolderNameField") as! Bool
+            nextConfig.card.showsStorePaymentMethodField = cardConfig.value(forKey: "showsStorePaymentMethodField") as! Bool
+            nextConfig.card.showsSecurityCodeField = cardConfig.value(forKey: "showsSecurityCodeField") as! Bool
+        }
+        
         return nextConfig
     }
 }

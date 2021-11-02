@@ -6,12 +6,9 @@ export type Amount = {
 };
 
 export type CardConfiguration = {
-  /** @todo NOT IMPLEMENTED */
-  showsHolderNameField?: boolean;
-  /** @todo NOT IMPLEMENTED */
-  showsStorePaymentMethodField?: boolean;
-  /** @todo NOT IMPLEMENTED */
-  showsSecurityCodeField?: boolean;
+  showsHolderNameField: boolean;
+  showsStorePaymentMethodField: boolean;
+  showsSecurityCodeField: boolean;
 };
 
 export type ApplePayConfiguration = {
@@ -31,7 +28,6 @@ export type DropInConfiguration = {
   environment: 'test' | 'live';
   countryCode: string;
   amount: Amount;
-  /** @todo NOT IMPLEMENTED */
   card?: CardConfiguration;
   applePay?: ApplePayConfiguration;
   returnUrl?: string;
