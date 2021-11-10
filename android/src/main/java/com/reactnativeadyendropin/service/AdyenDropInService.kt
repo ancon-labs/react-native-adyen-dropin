@@ -2,9 +2,13 @@ package com.reactnativeadyendropin.service
 
 import android.util.Log
 import com.adyen.checkout.core.model.toStringPretty
+import com.adyen.checkout.components.ActionComponentData
+import com.adyen.checkout.components.PaymentComponentState
 import com.adyen.checkout.dropin.service.DropInService
 import com.adyen.checkout.dropin.service.DropInServiceResult
 import com.adyen.checkout.redirect.RedirectComponent
+import com.facebook.react.bridge.ReadableMap
+import com.reactnativeadyendropin.RNUtils
 import com.reactnativeadyendropin.data.storage.MemoryStorage
 import com.reactnativeadyendropin.repositories.paymentMethods.PaymentsRepository
 import okhttp3.MediaType
@@ -25,10 +29,74 @@ class AdyenDropInService : DropInService() {
   companion object {
     private val TAG = "AdyenDropInService"
     private val CONTENT_TYPE: MediaType = "application/json".toMediaType()
+    private var instance: AdyenDropInService? = null
+
+    fun handleAsyncResponse(response: ReadableMap) {
+      val resultCode = response.getString("resultCode")
+      Log.d(TAG, "handleAsyncResponse - ${resultCode}")
+
+      when (resultCode) {
+        "Authorised",
+        "Pending",
+        "Received",
+        "ChallengeShopper",
+        "IdentifyShopper",
+        "PresentToShopper",
+        "RedirectShopper" -> {
+          val action = response.getMap("action")
+          if (action != null) {
+            instance?.sendResult(DropInServiceResult.Action(JSONObject(action.toHashMap()).toString()))
+          } else {
+            instance?.sendResult(DropInServiceResult.Finished(JSONObject(response.toHashMap()).toString()))
+          }
+        }
+
+        "Cancelled",
+        "Error",
+        "Refused" -> {
+          instance?.sendResult(DropInServiceResult.Error(reason = resultCode))
+        }
+      }
+    }
   }
 
   private val paymentsRepository: PaymentsRepository by inject()
   private val memoryStorage: MemoryStorage by inject()
+
+  init {
+    instance = this
+  }
+
+  override fun onPaymentsCallRequested(paymentComponentState: PaymentComponentState<*>, paymentComponentJson: JSONObject) {
+    Log.d(TAG, "onPaymentsCallRequested")
+
+    if (memoryStorage.onSubmitCallback == null) {
+      super.onPaymentsCallRequested(paymentComponentState, paymentComponentJson)
+      return
+    }
+
+    val event = RNUtils.jsonToWritableMap(paymentComponentJson)
+
+    if (event != null) {
+      event.putString("channel", "Android")
+      memoryStorage.onSubmitCallback?.invoke(event)
+    }
+  }
+
+  override fun onDetailsCallRequested(actionComponentData: ActionComponentData, actionComponentJson: JSONObject) {
+    Log.d(TAG, "onDetailsCallRequested")
+
+    if (memoryStorage.onAdditionalDetailsCallback == null) {
+      super.onDetailsCallRequested(actionComponentData, actionComponentJson)
+      return
+    }
+
+    val event = RNUtils.jsonToWritableMap(actionComponentJson)
+
+    if (event != null) {
+      memoryStorage.onAdditionalDetailsCallback?.invoke(event)
+    }
+  }
 
   override fun makePaymentsCall(paymentComponentJson: JSONObject): DropInServiceResult {
     Log.d(TAG, "makePaymentsCall")
