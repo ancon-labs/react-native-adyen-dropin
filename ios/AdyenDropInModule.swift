@@ -14,6 +14,10 @@ class AdyenDropInModule: NSObject {
     
     private var rejectCallback: RCTResponseSenderBlock? = nil
     
+    private var onSubmitCallback: RCTResponseSenderBlock? = nil
+    
+    private var onAdditionalDetailsCallback: RCTResponseSenderBlock? = nil
+    
     // MARK: - RN module
     
     @objc
@@ -113,6 +117,74 @@ class AdyenDropInModule: NSObject {
     }
     
     @objc
+    func setSubmitCallback(_ onSubmit: @escaping RCTResponseSenderBlock) {
+        print("Called setSubmitCallback")
+        self.onSubmitCallback = onSubmit
+    }
+    
+    @objc
+    func setAdditionalDetailsCallback(_ onAdditionalDetails: @escaping RCTResponseSenderBlock) {
+        print("Called setAdditionalDetailsCallback")
+        self.onAdditionalDetailsCallback = onAdditionalDetails
+    }
+    
+    @objc
+    func setPaymentResponse(_ paymentResponse: NSDictionary?) {
+        print("Called setPaymentResponse")
+        
+        guard paymentResponse != nil else {
+            return
+        }
+
+        do {
+            let response = try AdyenDropInModule.decodeResponse(paymentResponse!)
+            self.handleAsyncResponse(response)
+        } catch let err {
+            print(err.localizedDescription)
+        }
+    }
+    
+    @objc
+    func setDetailsResponse(_ detailsResponse: NSDictionary?) {
+        print("Called setDetailsResponse")
+        
+        guard detailsResponse != nil else {
+            return
+        }
+
+        do {
+            let response = try AdyenDropInModule.decodeResponse(detailsResponse!)
+            self.handleAsyncResponse(response)
+        } catch let err {
+            print(err.localizedDescription)
+        }
+    }
+    
+    static func decodeResponse(_ response: NSDictionary) throws -> PaymentResponse {
+        let JSON = try JSONSerialization.data(withJSONObject: response)
+        let decoded = try Coder.decode(JSON) as PaymentResponse
+        return decoded
+    }
+    
+    func handleAsyncResponse(_ result: PaymentResponse) {
+        switch result.resultCode {
+        case .authorised, .pending, .received, .challengeShopper, .identifyShopper, .presentToShopper, .redirectShopper:
+            if let action = result.action {
+                handle(action)
+            } else {
+                DispatchQueue.main.async {
+                    self.finish(with: result.resultCode)
+                }
+            }
+
+        case .cancelled, .error, .refused:
+            DispatchQueue.main.async {
+                self.finish(with: result.resultCode)
+            }
+        }
+    }
+    
+    @objc
     func start(_ paymentMethodsResponse: NSDictionary, resolveCallback: @escaping RCTResponseSenderBlock, rejectCallback: @escaping RCTResponseSenderBlock) {
         print("Called start")
         
@@ -185,7 +257,15 @@ class AdyenDropInModule: NSObject {
         currentComponent?.finalizeIfNeeded(with: success)
 
         presenter?.dismiss(animated: true) { [weak self] in
-            self?.resolve(["resultCode": resultCode.rawValue])
+            print("Dismiss successfully")
+            
+            do {
+                let jsonObject = try JSONEncoder().encode(["resultCode": resultCode.rawValue])
+                let str = String(data: jsonObject, encoding: .utf8)
+                self?.resolve(str as Any)
+            } catch let err {
+                print(err.localizedDescription)
+            }
         }
     }
 
@@ -253,25 +333,41 @@ class AdyenDropInModule: NSObject {
 extension AdyenDropInModule: DropInComponentDelegate {
 
     internal func didSubmit(_ data: PaymentComponentData, for paymentMethod: PaymentMethod, from component: DropInComponent) {
-        print("User did start: \(paymentMethod.name)")
-        let headers = MemoryStorage.current.headers
-        let path = MemoryStorage.current.makePaymentEndpoint
-        let request = PaymentsRequest(headers: headers, path: path, data: data)
-        apiClient?.perform(request, completionHandler: paymentResponseHandler)
+        if self.onSubmitCallback != nil {
+            self.onSubmitCallback?([[
+                "paymentMethod": data.paymentMethod.encodable.dictionary as Any,
+                "storePaymentMethod": data.storePaymentMethod,
+                "browserInfo": data.browserInfo as Any,
+                "channel": "iOS"
+            ]])
+        } else {
+            print("User did start: \(paymentMethod.name)")
+            let headers = MemoryStorage.current.headers
+            let path = MemoryStorage.current.makePaymentEndpoint
+            let request = PaymentsRequest(headers: headers, path: path, data: data)
+            apiClient?.perform(request, completionHandler: paymentResponseHandler)
+        }
     }
 
     internal func didProvide(_ data: ActionComponentData, from component: DropInComponent) {
-        let headers = MemoryStorage.current.headers
-        let path = MemoryStorage.current.makeDetailsCallEndpoint
-        
-        let request = PaymentDetailsRequest(
-            headers: headers,
-            path: path,
-            details: data.details,
-            paymentData: data.paymentData,
-            merchantAccount: MemoryStorage.current.merchantAccount
-        )
-        apiClient?.perform(request, completionHandler: paymentResponseHandler)
+        if self.onAdditionalDetailsCallback != nil {
+            self.onAdditionalDetailsCallback?([[
+                "details": data.details.dictionary as Any,
+                "paymentData": (data.paymentData ?? "") as String
+            ]])
+        } else {
+            let headers = MemoryStorage.current.headers
+            let path = MemoryStorage.current.makeDetailsCallEndpoint
+            
+            let request = PaymentDetailsRequest(
+                headers: headers,
+                path: path,
+                details: data.details,
+                paymentData: data.paymentData,
+                merchantAccount: MemoryStorage.current.merchantAccount
+            )
+            apiClient?.perform(request, completionHandler: paymentResponseHandler)
+        }
     }
 
     internal func didComplete(from component: DropInComponent) {
@@ -285,6 +381,34 @@ extension AdyenDropInModule: DropInComponentDelegate {
     internal func didCancel(component: PaymentComponent, from dropInComponent: DropInComponent) {
         // Handle the event when the user closes a PresentableComponent.
         print("User did close: \(component.paymentMethod.name)")
+    }
+
+}
+
+extension Encodable {
+
+    var dictionary: [String: Any]? {
+        guard let data = try? JSONEncoder().encode(self) else { return nil }
+        return (try? JSONSerialization.jsonObject(with: data, options: .allowFragments)).flatMap { $0 as? [String: Any] }
+    }
+
+}
+
+struct PaymentResponse: Decodable {
+
+    internal let resultCode: ResultCode
+
+    internal let action: Action?
+
+    internal init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.resultCode = try container.decode(ResultCode.self, forKey: .resultCode)
+        self.action = try container.decodeIfPresent(Action.self, forKey: .action)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case resultCode
+        case action
     }
 
 }

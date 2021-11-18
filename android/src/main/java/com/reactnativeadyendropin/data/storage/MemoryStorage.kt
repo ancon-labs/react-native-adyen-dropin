@@ -1,6 +1,7 @@
 package com.reactnativeadyendropin.data.storage
 
 import com.adyen.checkout.components.model.payments.Amount
+import com.facebook.react.bridge.Callback
 import com.reactnativeadyendropin.data.api.model.paymentsRequest.AdditionalData
 
 class MemoryStorage {
@@ -37,6 +38,8 @@ class MemoryStorage {
   var headers: Map<String, String> = mutableMapOf()
   var makePaymentEndpoint: String = DEFAULT_PAYMENT_ENDPOINT
   var makeDetailsCallEndpoint: String = DEFAULT_DETAILS_ENDPOINT
+  var onSubmitCallback: Callback? = null
+  var onAdditionalDetailsCallback: Callback? = null
 
   fun getAmount(): Amount {
     val amount = Amount()

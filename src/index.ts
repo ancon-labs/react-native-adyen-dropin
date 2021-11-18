@@ -71,6 +71,11 @@ export type ModuleConfig = {
      */
     makeDetailsCall: string;
   };
+  /** Optional custom callbacks */
+  callbacks?: {
+    onSubmit: (data: any) => void;
+    onAdditionalDetails: (data: any) => void;
+  };
 };
 
 export type PaymentMethod = {
@@ -188,6 +193,30 @@ const AdyenDropIn = {
   setModuleConfig(moduleConfig: ModuleConfig) {
     const cleanedModuleConfig = cleanModuleConfig(moduleConfig);
     AdyenDropInModule.setModuleConfig(cleanedModuleConfig);
+    if (moduleConfig.callbacks) {
+      AdyenDropInModule.setSubmitCallback(moduleConfig.callbacks.onSubmit);
+      AdyenDropInModule.setAdditionalDetailsCallback(
+        moduleConfig.callbacks.onAdditionalDetails
+      );
+    }
+    return this;
+  },
+  /**
+   * ***Optional*** Call this function to set payment response for the RN module
+   * @param paymentResponse Payment response object
+   * @returns `AdyenDropIn` instance (`this`)
+   */
+  setPaymentResponse(paymentResponse: any) {
+    AdyenDropInModule.setPaymentResponse(paymentResponse);
+    return this;
+  },
+  /**
+   * ***Optional*** Call this function to set details response for the RN module
+   * @param detailsResponse Details response object
+   * @returns `AdyenDropIn` instance (`this`)
+   */
+  setDetailsResponse(detailsResponse: any) {
+    AdyenDropInModule.setDetailsResponse(detailsResponse);
     return this;
   },
   /**
