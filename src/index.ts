@@ -44,8 +44,20 @@ export type ModuleConfig = {
    * Set to `true` to view more native logs
    */
   debug?: boolean;
+  /** Optional Set to `true` to disable native requests.
+   *
+   * Remember to provide custom callbacks and call setPaymentResponse
+   * and setDetailsResponse.
+   *
+   * **Unsafe! The JavaScript thread might get paused on Android!**
+   */
+  disableNativeRequests?: boolean;
   /** Optional custom headers to add to requests */
   headers?: {
+    [key: string]: string;
+  };
+  /** Optional custom query parameters to add to requests */
+  queryParameters?: {
     [key: string]: string;
   };
   /** Optional custom endpoints */

@@ -20,9 +20,13 @@ internal struct PaymentsRequest: Request {
     
     internal var headers: [String: String] = [:]
     
-    init(headers: [String: String]?, path: String?, data: PaymentComponentData) {
+    init(headers: [String: String]?, queryParameters: [URLQueryItem]?, path: String?, data: PaymentComponentData) {
         if (headers != nil) {
             self.headers = headers!
+        }
+        
+        if (queryParameters != nil) {
+            self.queryParameters = queryParameters!
         }
         
         if (path != nil) {

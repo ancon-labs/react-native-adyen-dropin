@@ -101,8 +101,22 @@ class AdyenDropInModule: NSObject {
             AdyenLogging.isEnabled = debug
         }
         
+        if let disableNativeRequests = config?["disableNativeRequests"] as? Bool {
+            MemoryStorage.current.disableNativeRequests = disableNativeRequests
+        }
+        
         if let headers = config?["headers"] as? [String: String] {
             MemoryStorage.current.headers = headers
+        }
+
+        if let queryParameters = config?["queryParameters"] as? [String: String] {
+            var arr = [URLQueryItem]()
+
+            for (key, value) in queryParameters {
+                arr.append(URLQueryItem(name: key, value: value))
+            }
+            
+            MemoryStorage.current.queryParameters = arr
         }
         
         if let endpoints = config?["endpoints"] as? NSDictionary {
@@ -340,13 +354,18 @@ extension AdyenDropInModule: DropInComponentDelegate {
                 "browserInfo": data.browserInfo as Any,
                 "channel": "iOS"
             ]])
-        } else {
-            print("User did start: \(paymentMethod.name)")
-            let headers = MemoryStorage.current.headers
-            let path = MemoryStorage.current.makePaymentEndpoint
-            let request = PaymentsRequest(headers: headers, path: path, data: data)
-            apiClient?.perform(request, completionHandler: paymentResponseHandler)
         }
+        
+        if (MemoryStorage.current.disableNativeRequests) {
+            return
+        }
+        
+        print("User did start: \(paymentMethod.name)")
+        let headers = MemoryStorage.current.headers
+        let queryParameters = MemoryStorage.current.queryParameters
+        let path = MemoryStorage.current.makePaymentEndpoint
+        let request = PaymentsRequest(headers: headers, queryParameters: queryParameters, path: path, data: data)
+        apiClient?.perform(request, completionHandler: paymentResponseHandler)
     }
 
     internal func didProvide(_ data: ActionComponentData, from component: DropInComponent) {
@@ -355,19 +374,25 @@ extension AdyenDropInModule: DropInComponentDelegate {
                 "details": data.details.dictionary as Any,
                 "paymentData": (data.paymentData ?? "") as String
             ]])
-        } else {
-            let headers = MemoryStorage.current.headers
-            let path = MemoryStorage.current.makeDetailsCallEndpoint
-            
-            let request = PaymentDetailsRequest(
-                headers: headers,
-                path: path,
-                details: data.details,
-                paymentData: data.paymentData,
-                merchantAccount: MemoryStorage.current.merchantAccount
-            )
-            apiClient?.perform(request, completionHandler: paymentResponseHandler)
         }
+        
+        if (MemoryStorage.current.disableNativeRequests) {
+            return
+        }
+        
+        let headers = MemoryStorage.current.headers
+        let queryParameters = MemoryStorage.current.queryParameters
+        let path = MemoryStorage.current.makeDetailsCallEndpoint
+        
+        let request = PaymentDetailsRequest(
+            headers: headers,
+            queryParameters: queryParameters,
+            path: path,
+            details: data.details,
+            paymentData: data.paymentData,
+            merchantAccount: MemoryStorage.current.merchantAccount
+        )
+        apiClient?.perform(request, completionHandler: paymentResponseHandler)
     }
 
     internal func didComplete(from component: DropInComponent) {
