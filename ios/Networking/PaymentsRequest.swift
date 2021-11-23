@@ -89,9 +89,60 @@ internal struct PaymentsRequest: Request {
     
 }
 
-internal struct AdditionalData: Codable {
-    internal let errorCode: String?
-    internal let paymentMethod: String?
+internal enum StringOrFloat: Codable {
+    case string(String)
+    case float(Float)
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        if let x = try? container.decode(String.self) {
+            self = .string(x)
+            return
+        }
+        if let x = try? container.decode(Float.self) {
+            self = .float(x)
+            return
+        }
+        throw DecodingError.typeMismatch(StringOrFloat.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Wrong type for StringOrFloat"))
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        switch self {
+        case .string(let x):
+            try container.encode(x)
+        case .float(let x):
+            try container.encode(x)
+        }
+    }
+}
+
+internal enum AdditionalData: Codable {
+    case object([String: StringOrFloat?])
+    case array([[String: StringOrFloat?]])
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        if let x = try? container.decode([String: StringOrFloat?].self) {
+            self = .object(x)
+            return
+        }
+        if let x = try? container.decode([[String: StringOrFloat?]].self) {
+            self = .array(x)
+            return
+        }
+        throw DecodingError.typeMismatch(AdditionalData.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Wrong type for AdditionalData"))
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        switch self {
+        case .object(let x):
+            try? container.encode(x)
+        case .array(let x):
+            try? container.encode(x)
+        }
+    }
 }
 
 internal struct PaymentsResponse: Response {
