@@ -22,9 +22,13 @@ internal struct PaymentDetailsRequest: APIRequest {
     
     internal var headers: [String: String] = [:]
     
-    init(headers: [String: String]?, path: String?, details: AdditionalDetails, paymentData: String?, merchantAccount: String?) {
+    init(headers: [String: String]?, queryParameters: [URLQueryItem]?, path: String?, details: AdditionalDetails, paymentData: String?, merchantAccount: String?) {
         if (headers != nil) {
             self.headers = headers!
+        }
+        
+        if (queryParameters != nil) {
+            self.queryParameters = queryParameters!
         }
         
         if (path != nil) {

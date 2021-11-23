@@ -100,9 +100,18 @@ class AdyenDropInModule(private val reactContext : ReactApplicationContext): Rea
           }
         }
 
+        if (config.hasKey("disableNativeRequests")) {
+          memoryStorage.disableNativeRequests = config.getBoolean("disableNativeRequests")
+        }
+
         if (config.hasKey("headers")) {
           val map = config.getMap("headers")!!
           memoryStorage.headers = RNUtils.readableMapToStringMap(map)
+        }
+
+        if (config.hasKey("queryParameters")) {
+          val map = config.getMap("queryParameters")!!
+          memoryStorage.queryParameters = RNUtils.readableMapToStringMap(map)
         }
 
         if (config.hasKey("endpoints")) {

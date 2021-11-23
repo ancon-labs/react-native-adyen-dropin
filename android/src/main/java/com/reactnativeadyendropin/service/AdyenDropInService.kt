@@ -70,8 +70,11 @@ class AdyenDropInService : DropInService() {
   override fun onPaymentsCallRequested(paymentComponentState: PaymentComponentState<*>, paymentComponentJson: JSONObject) {
     Log.d(TAG, "onPaymentsCallRequested")
 
-    if (memoryStorage.onSubmitCallback == null) {
+    if (!memoryStorage.disableNativeRequests) {
       super.onPaymentsCallRequested(paymentComponentState, paymentComponentJson)
+    }
+
+    if (memoryStorage.onSubmitCallback == null) {
       return
     }
 
@@ -86,8 +89,11 @@ class AdyenDropInService : DropInService() {
   override fun onDetailsCallRequested(actionComponentData: ActionComponentData, actionComponentJson: JSONObject) {
     Log.d(TAG, "onDetailsCallRequested")
 
-    if (memoryStorage.onAdditionalDetailsCallback == null) {
+    if (!memoryStorage.disableNativeRequests) {
       super.onDetailsCallRequested(actionComponentData, actionComponentJson)
+    }
+
+    if (memoryStorage.onAdditionalDetailsCallback == null) {
       return
     }
 
@@ -120,6 +126,7 @@ class AdyenDropInService : DropInService() {
 
     val call = paymentsRepository.paymentsRequest(
       memoryStorage.headers,
+      memoryStorage.queryParameters,
       url,
       requestBody
     )
@@ -137,6 +144,7 @@ class AdyenDropInService : DropInService() {
 
     val call = paymentsRepository.detailsRequest(
       memoryStorage.headers,
+      memoryStorage.queryParameters,
       url,
       requestBody
     )

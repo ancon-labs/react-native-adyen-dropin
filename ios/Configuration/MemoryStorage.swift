@@ -9,7 +9,11 @@ class MemoryStorage {
     
     var debug: Bool = false
     
+    var disableNativeRequests: Bool = false
+    
     var headers: [String: String]? = nil
+    
+    var queryParameters: [URLQueryItem]? = nil
     
     var makePaymentEndpoint: String = "payments"
     
