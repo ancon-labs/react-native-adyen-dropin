@@ -174,26 +174,26 @@ class AdyenDropInModule: NSObject {
         }
     }
     
-    static func decodeResponse(_ response: NSDictionary) throws -> PaymentResponse {
+    static func decodeResponse(_ response: NSDictionary) throws -> PaymentsResponse {
         let JSON = try JSONSerialization.data(withJSONObject: response)
-        let decoded = try Coder.decode(JSON) as PaymentResponse
+        let decoded = try Coder.decode(JSON) as PaymentsResponse
         return decoded
     }
     
-    func handleAsyncResponse(_ result: PaymentResponse) {
+    func handleAsyncResponse(_ result: PaymentsResponse) {
         switch result.resultCode {
         case .authorised, .pending, .received, .challengeShopper, .identifyShopper, .presentToShopper, .redirectShopper:
             if let action = result.action {
                 handle(action)
             } else {
                 DispatchQueue.main.async {
-                    self.finish(with: result.resultCode)
+                    self.finish(with: result)
                 }
             }
 
         case .cancelled, .error, .refused:
             DispatchQueue.main.async {
-                self.finish(with: result.resultCode)
+                self.finish(with: result)
             }
         }
     }
@@ -415,25 +415,6 @@ extension Encodable {
     var dictionary: [String: Any]? {
         guard let data = try? JSONEncoder().encode(self) else { return nil }
         return (try? JSONSerialization.jsonObject(with: data, options: .allowFragments)).flatMap { $0 as? [String: Any] }
-    }
-
-}
-
-struct PaymentResponse: Decodable {
-
-    internal let resultCode: ResultCode
-
-    internal let action: Action?
-
-    internal init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.resultCode = try container.decode(ResultCode.self, forKey: .resultCode)
-        self.action = try container.decodeIfPresent(Action.self, forKey: .action)
-    }
-
-    private enum CodingKeys: String, CodingKey {
-        case resultCode
-        case action
     }
 
 }
