@@ -369,6 +369,12 @@ extension AdyenDropInModule: DropInComponentDelegate {
     }
 
     internal func didProvide(_ data: ActionComponentData, from component: DropInComponent) {
+        // We need to disable user interaction while processing payments, because otherwise
+        // it might be possible to start another payment while waiting.
+        // Details: https://github.com/Adyen/adyen-ios/issues/714
+        print("Disabling user interaction")
+        currentComponent?.viewController.view.isUserInteractionEnabled = false
+        
         if self.onAdditionalDetailsCallback != nil {
             self.onAdditionalDetailsCallback?([[
                 "details": data.details.dictionary as Any,
