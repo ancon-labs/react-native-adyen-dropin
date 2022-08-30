@@ -1,5 +1,12 @@
 # Migration from v2 to v3
 
+Update `Podfile.lock`:
+
+```sh
+cd ios
+pod update Adyen
+```
+
 Update your app's `/android/app/src/main/res/values/styles.xml`:
 
 ```diff
