@@ -9,8 +9,8 @@
 
 React Native bridge for Adyen drop-in
 
-🍏 Adyen iOS SDK v4.3.0
-🤖 Adyen Android SDK v4.2.0
+🍏 Adyen iOS SDK v4.8.0
+🤖 Adyen Android SDK v4.7.1
 
 ## Installation
 
@@ -45,21 +45,28 @@ dependencies {
 }
 ```
 
-Add the following into `/android/app/src/main/res/values/styles.xml`:
+Replace `name` in `/android/app/src/main/res/values/styles.xml`:
 
 ```diff
 <resources>
   <!-- Base application theme. -->
-  <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+-  <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
++  <style name="CustomAppTheme" parent="Theme.AppCompat.Light.NoActionBar">
       <!-- Customize your theme here. -->
       <item name="android:textColor">#000000</item>
   </style>
-+  <style name="AdyenCheckout.TextInputLayout">
-+    <item name="boxStrokeColor">@color/primaryColor</item>
-+    <item name="hintTextColor">@color/primaryColor</item>
-+    <item name="android:minHeight">@dimen/input_layout_height</item>
-+  </style>
 </resources>
+```
+
+Also update `theme` in `/android/app/src/main/AndroidManifest.xml`:
+
+```diff
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  package="com.example.reactnativeadyendropin">
+
+    <application
+-      android:theme="@style/AppTheme">
++      android:theme="@style/CustomAppTheme">
 ```
 
 Add the following into `onCreate()` in `MainApplication.java`:
