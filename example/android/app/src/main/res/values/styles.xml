@@ -1,15 +1,9 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
+    <style name="ExampleAppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="android:editTextBackground">@drawable/rn_edit_text_material</item>
     </style>
-
-  <style name="AdyenCheckout.TextInputLayout">
-    <item name="boxStrokeColor">@color/primaryColor</item>
-    <item name="hintTextColor">@color/primaryColor</item>
-    <item name="android:minHeight">@dimen/input_layout_height</item>
-  </style>
 
 </resources>
