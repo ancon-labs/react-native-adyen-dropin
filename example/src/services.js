@@ -1,5 +1,9 @@
 import { Platform } from 'react-native';
 
+const { default: config } = __DEV__
+  ? require('../config')
+  : require('../config.example');
+
 export const httpPost = async (url, data) => {
   const response = await fetch(url, {
     method: 'POST',
@@ -28,7 +32,5 @@ export const httpPost = async (url, data) => {
   throw responseData;
 };
 
-const BASE_URL = 'http://192.168.1.74:3000/api';
-
 export const getPaymentMethods = async (configuration) =>
-  httpPost(`${BASE_URL}/paymentMethods`, configuration);
+  httpPost(`${config.baseUrl}/paymentMethods`, configuration);

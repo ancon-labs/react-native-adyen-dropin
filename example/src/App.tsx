@@ -22,7 +22,7 @@ export default function App() {
 
       const adyenDropIn = AdyenDropIn.setModuleConfig({
         // Required
-        baseUrl: 'http://192.168.1.74:3000/api/',
+        baseUrl: config.baseUrl,
         // Optional
         debug: true,
         // Optional
@@ -33,6 +33,7 @@ export default function App() {
         endpoints: {
           makePayment: '/payments',
           makeDetailsCall: '/details',
+          disableStoredPaymentMethod: '/disable',
         },
       }).setDropInConfig({
         // Required
@@ -51,6 +52,10 @@ export default function App() {
             merchantId: config.applePay?.configuration?.merchantId,
           },
         },
+        // Optional
+        showRemovePaymentMethodButton: config.showRemovePaymentMethodButton,
+        // Optional, required for recurring payments/saved payment method
+        shopperReference: config.shopperReference,
       });
 
       const response = await services.getPaymentMethods();
