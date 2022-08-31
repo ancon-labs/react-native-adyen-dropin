@@ -166,9 +166,18 @@ function trimStartingSlash(str?: string): string | undefined {
   return str ?? '';
 }
 
+function appendTrailingSlash(str: string): string {
+  if (str.endsWith('/')) {
+    return str;
+  }
+
+  return `${str}/`;
+}
+
 function cleanModuleConfig(dirtyModuleConfig: ModuleConfig): ModuleConfig {
   return {
     ...dirtyModuleConfig,
+    baseUrl: appendTrailingSlash(dirtyModuleConfig.baseUrl),
     ...(dirtyModuleConfig.endpoints
       ? {
           endpoints: {
