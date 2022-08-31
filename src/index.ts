@@ -31,6 +31,8 @@ export type DropInConfiguration = {
   card?: CardConfiguration;
   applePay?: ApplePayConfiguration;
   returnUrl?: string;
+  shopperReference?: string;
+  showRemovePaymentMethodButton?: boolean;
 };
 
 export type ModuleConfig = {
@@ -78,6 +80,14 @@ export type ModuleConfig = {
      * "details"
      */
     makeDetailsCall: string;
+    /**
+     * Optional URL to call, with or without "/" at beginning
+     * @example
+     * "/disable"
+     * @example
+     * "disable"
+     */
+    disableStoredPaymentMethod?: string;
   };
   /** Optional custom callbacks */
   callbacks?: {
