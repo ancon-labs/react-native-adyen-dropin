@@ -19,6 +19,8 @@ class MemoryStorage {
     
     var makeDetailsCallEndpoint: String = "payments/details"
     
+    var disableStoredPaymentMethodEndpoint: String = "disable"
+    
     // MARK: - Adyen DropIn related
     
     var clientKey: String? = nil

@@ -7,7 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		F4FF95D7245B92E800C19C63 /* AdyenDropInViewManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4FF95D6245B92E800C19C63 /* AdyenDropInViewManager.swift */; };
+		24E173C928BF4F0800FB3377 /* ConfigurationParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24E173C428BF4F0800FB3377 /* ConfigurationParser.swift */; };
+		24E173CA28BF4F0800FB3377 /* AdyenDropInModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24E173C728BF4F0800FB3377 /* AdyenDropInModule.swift */; };
+		24E173CB28BF4F0800FB3377 /* AdyenDropInModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 24E173C828BF4F0800FB3377 /* AdyenDropInModule.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -24,9 +26,13 @@
 
 /* Begin PBXFileReference section */
 		134814201AA4EA6300B7C361 /* libAdyenDropIn.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libAdyenDropIn.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		B3E7B5891CC2AC0600A0062D /* AdyenDropInViewManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AdyenDropInViewManager.m; sourceTree = "<group>"; };
+		24E173C328BF4F0800FB3377 /* Configuration */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Configuration; sourceTree = "<group>"; };
+		24E173C428BF4F0800FB3377 /* ConfigurationParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConfigurationParser.swift; sourceTree = "<group>"; };
+		24E173C528BF4F0800FB3377 /* Networking */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Networking; sourceTree = "<group>"; };
+		24E173C628BF4F0800FB3377 /* AdyenDropin-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AdyenDropin-Bridging-Header.h"; sourceTree = "<group>"; };
+		24E173C728BF4F0800FB3377 /* AdyenDropInModule.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AdyenDropInModule.swift; sourceTree = "<group>"; };
+		24E173C828BF4F0800FB3377 /* AdyenDropInModule.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AdyenDropInModule.m; sourceTree = "<group>"; };
 		F4FF95D5245B92E700C19C63 /* AdyenDropIn-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "AdyenDropIn-Bridging-Header.h"; sourceTree = "<group>"; };
-		F4FF95D6245B92E800C19C63 /* AdyenDropInViewManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdyenDropInViewManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -51,8 +57,12 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
-				F4FF95D6245B92E800C19C63 /* AdyenDropInViewManager.swift */,
-				B3E7B5891CC2AC0600A0062D /* AdyenDropInViewManager.m */,
+				24E173C628BF4F0800FB3377 /* AdyenDropin-Bridging-Header.h */,
+				24E173C828BF4F0800FB3377 /* AdyenDropInModule.m */,
+				24E173C728BF4F0800FB3377 /* AdyenDropInModule.swift */,
+				24E173C328BF4F0800FB3377 /* Configuration */,
+				24E173C428BF4F0800FB3377 /* ConfigurationParser.swift */,
+				24E173C528BF4F0800FB3377 /* Networking */,
 				F4FF95D5245B92E700C19C63 /* AdyenDropIn-Bridging-Header.h */,
 				134814211AA4EA7D00B7C361 /* Products */,
 			);
@@ -92,7 +102,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 58B511D61A9E6C8500147676 /* Build configuration list for PBXProject "AdyenDropIn" */;
+			buildConfigurationList = 58B511D61A9E6C8500147676 /* Build configuration list for PBXProject "AdyenDropin" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -115,7 +125,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F4FF95D7245B92E800C19C63 /* AdyenDropInViewManager.swift in Sources */,
+				24E173CB28BF4F0800FB3377 /* AdyenDropInModule.m in Sources */,
+				24E173C928BF4F0800FB3377 /* ConfigurationParser.swift in Sources */,
+				24E173CA28BF4F0800FB3377 /* AdyenDropInModule.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -255,7 +267,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		58B511D61A9E6C8500147676 /* Build configuration list for PBXProject "AdyenDropIn" */ = {
+		58B511D61A9E6C8500147676 /* Build configuration list for PBXProject "AdyenDropin" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				58B511ED1A9E6C8500147676 /* Debug */,

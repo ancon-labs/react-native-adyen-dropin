@@ -127,6 +127,10 @@ class AdyenDropInModule: NSObject {
             if let makeDetailsCallEndpoint = endpoints["makeDetailsCall"] as? String {
                 MemoryStorage.current.makeDetailsCallEndpoint = makeDetailsCallEndpoint
             }
+            
+            if let disableStoredPaymentMethodEndpoint = endpoints["disableStoredPaymentMethodEndpoint"] as? String {
+                MemoryStorage.current.disableStoredPaymentMethodEndpoint = disableStoredPaymentMethodEndpoint
+            }
         }
     }
     
@@ -244,6 +248,7 @@ class AdyenDropInModule: NSObject {
                                         style: dropInComponentStyle,
                                         title: nil)
         component.delegate = self
+        component.storedPaymentMethodsDelegate = self
         currentComponent = component
         
         presenter?.present(component.viewController, animated: true, completion: nil)
@@ -414,6 +419,25 @@ extension AdyenDropInModule: DropInComponentDelegate {
         print("User did close: \(component.paymentMethod.name)")
     }
 
+}
+
+extension AdyenDropInModule: StoredPaymentMethodsDelegate {
+    func disable(storedPaymentMethod: StoredPaymentMethod, completion: @escaping (Bool) -> Void) {
+        let request = DisableStoredPaymentMethodRequest(recurringDetailReference: storedPaymentMethod.identifier)
+        apiClient?.perform(request) { [weak self] result in
+            self?.handleDisableResult(result, completion: completion)
+        }
+    }
+    
+    private func handleDisableResult(_ result: Result<DisableStoredPaymentMethodRequest.ResponseType, Error>, completion: (Bool) -> Void) {
+        switch result {
+        case let .failure(error):
+            finish(with: error)
+            completion(false)
+        case let .success(response):
+            completion(response.response == .detailsDisabled)
+        }
+    }
 }
 
 extension Encodable {

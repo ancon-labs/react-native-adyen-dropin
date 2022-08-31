@@ -56,6 +56,10 @@ struct ConfigurationParser {
             nextConfig.card.showsSecurityCodeField = cardConfig.value(forKey: "showsSecurityCodeField") as! Bool
         }
         
+        if let showRemovePaymentMethodButton = config.value(forKey: "showRemovePaymentMethodButton") as? Bool {
+            nextConfig.paymentMethodsList.allowDisablingStoredPaymentMethods = showRemovePaymentMethodButton
+        }
+        
         return nextConfig
     }
 }
