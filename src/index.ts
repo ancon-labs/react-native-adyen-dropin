@@ -28,6 +28,7 @@ export type DropInConfiguration = {
   environment: 'test' | 'live';
   countryCode: string;
   amount: Amount;
+  merchantAccount?: string;
   card?: CardConfiguration;
   applePay?: ApplePayConfiguration;
   returnUrl?: string;
@@ -71,7 +72,7 @@ export type ModuleConfig = {
      * @example
      * "payments"
      */
-    makePayment: string;
+    makePayment?: string;
     /**
      * Full details URL to call, with or without "/" at beginning
      * @example
@@ -79,7 +80,7 @@ export type ModuleConfig = {
      * @example
      * "details"
      */
-    makeDetailsCall: string;
+    makeDetailsCall?: string;
     /**
      * Optional URL to call, with or without "/" at beginning
      * @example
@@ -155,9 +156,11 @@ export function isSuccessResult(result: PaymentResult): boolean {
   return false;
 }
 
-function trimStartingSlash(str?: string): string {
+function trimStartingSlash(str?: string): string | undefined {
+  if (!str) return undefined;
+
   if (str && str.charAt(0) === '/') {
-    return str.substr(1);
+    return str.substring(1);
   }
 
   return str ?? '';
@@ -174,6 +177,9 @@ function cleanModuleConfig(dirtyModuleConfig: ModuleConfig): ModuleConfig {
             ),
             makeDetailsCall: trimStartingSlash(
               dirtyModuleConfig.endpoints.makeDetailsCall
+            ),
+            disableStoredPaymentMethod: trimStartingSlash(
+              dirtyModuleConfig.endpoints.disableStoredPaymentMethod
             ),
           },
         }
