@@ -4,10 +4,12 @@ import android.os.Build
 import com.adyen.checkout.core.api.SSLSocketUtil
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.reactnativeadyendropin.data.api.CheckoutApiService
+import com.reactnativeadyendropin.data.api.RecurringApiService
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -40,7 +42,7 @@ val networkModule = module {
     return builder.build()
   }
 
-  fun provideApi(httpClient: OkHttpClient): CheckoutApiService {
+  fun provide(httpClient: OkHttpClient, cl: Class<*>?): Any {
     return Retrofit.Builder()
       .baseUrl("https://localhost/") // NOT USED BUT REQUIRED TO BE SET
       .client(httpClient)
@@ -51,9 +53,18 @@ val networkModule = module {
       )
       .addCallAdapterFactory(CoroutineCallAdapterFactory())
       .build()
-      .create(CheckoutApiService::class.java)
+      .create(cl)
   }
 
-  single { provideHttpClient() }
-  single { provideApi(get()) }
+  fun provideCheckoutApi(httpClient: OkHttpClient): CheckoutApiService {
+    return provide(httpClient, CheckoutApiService::class.java) as CheckoutApiService
+  }
+
+  fun provideRecurringApi(httpClient: OkHttpClient): RecurringApiService {
+    return provide(httpClient, RecurringApiService::class.java) as RecurringApiService
+  }
+
+  single<OkHttpClient>(named("httpClient")){ provideHttpClient() }
+  single { provideCheckoutApi(get(named("httpClient"))) }
+  single { provideRecurringApi(get(named("httpClient"))) }
 }

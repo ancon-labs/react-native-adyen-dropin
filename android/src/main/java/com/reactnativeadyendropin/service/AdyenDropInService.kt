@@ -4,13 +4,19 @@ import android.util.Log
 import com.adyen.checkout.core.model.toStringPretty
 import com.adyen.checkout.components.ActionComponentData
 import com.adyen.checkout.components.PaymentComponentState
+import com.adyen.checkout.components.model.paymentmethods.StoredPaymentMethod
+import com.adyen.checkout.core.model.getStringOrNull
 import com.adyen.checkout.dropin.service.DropInService
 import com.adyen.checkout.dropin.service.DropInServiceResult
+import com.adyen.checkout.dropin.service.RecurringDropInServiceResult
 import com.adyen.checkout.redirect.RedirectComponent
 import com.facebook.react.bridge.ReadableMap
 import com.reactnativeadyendropin.RNUtils
 import com.reactnativeadyendropin.data.storage.MemoryStorage
+import com.reactnativeadyendropin.repositories.RecurringRepository
 import com.reactnativeadyendropin.repositories.paymentMethods.PaymentsRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -61,6 +67,7 @@ class AdyenDropInService : DropInService() {
   }
 
   private val paymentsRepository: PaymentsRepository by inject()
+  private val recurringRepository: RecurringRepository by inject()
   private val memoryStorage: MemoryStorage by inject()
 
   init {
@@ -113,9 +120,9 @@ class AdyenDropInService : DropInService() {
       memoryStorage.shopperReference,
       memoryStorage.getAmount(),
       memoryStorage.countryCode,
-      memoryStorage.merchantAccount,
       RedirectComponent.getReturnUrl(applicationContext),
-      memoryStorage.getAdditionalData()
+      memoryStorage.getAdditionalData(),
+      memoryStorage.merchantAccount,
     )
 
     Log.d(TAG, "paymentComponentJson - \"${paymentComponentJson.toStringPretty()}\"")
@@ -131,7 +138,7 @@ class AdyenDropInService : DropInService() {
       requestBody
     )
 
-    val res = handleResponse(call)
+    val res = handlePaymentResponse(call)
     return res
   }
 
@@ -149,12 +156,40 @@ class AdyenDropInService : DropInService() {
       requestBody
     )
 
-    return handleResponse(call)
+    return handlePaymentResponse(call)
+  }
+
+  override fun removeStoredPaymentMethod(
+    storedPaymentMethod: StoredPaymentMethod,
+    storedPaymentJSON: JSONObject
+  ) {
+    launch(Dispatchers.IO) {
+      Log.d(TAG, "removeStoredPaymentMethod")
+
+      val url = "${memoryStorage.baseUrl}${memoryStorage.disableStoredPaymentMethodEndpoint}"
+
+      val recurringId = storedPaymentMethod.id.orEmpty()
+      val requestBody = createRemoveStoredPaymentMethodRequest(
+        recurringId,
+        memoryStorage.shopperReference,
+        memoryStorage.merchantAccount
+      ).toString().toRequestBody(CONTENT_TYPE)
+      val call = recurringRepository.removeStoredPaymentMethod(
+        memoryStorage.headers,
+        memoryStorage.queryParameters,
+        url,
+        requestBody
+      )
+
+      val result = handleDisableResponse(call, recurringId)
+
+      sendRecurringResult(result)
+    }
   }
 
   @Suppress("NestedBlockDepth")
-  private fun handleResponse(call: Call<ResponseBody>): DropInServiceResult {
-    Log.d(TAG, "handleResponse")
+  private fun handlePaymentResponse(call: Call<ResponseBody>): DropInServiceResult {
+    Log.d(TAG, "handlePaymentResponse")
     return try {
       val response = call.execute()
 
@@ -180,6 +215,35 @@ class AdyenDropInService : DropInService() {
     } catch (e: IOException) {
       Log.e(TAG, "IOException", e)
       DropInServiceResult.Error(reason = "IOException")
+    }
+  }
+
+  private fun handleDisableResponse(call: Call<ResponseBody>, id: String): RecurringDropInServiceResult {
+    Log.d(AdyenDropInService.TAG, "handleDisableResponse")
+    return try {
+      val response = call.execute()
+
+      val byteArray = response.errorBody()?.bytes()
+      if (byteArray != null) {
+        Log.e(TAG, "errorBody - ${String(byteArray)}")
+      }
+
+      if (response.isSuccessful) {
+        val responseJSON = JSONObject(response.body()?.string() ?: "{}")
+
+        Log.d(TAG, "Response - ${responseJSON.toStringPretty()}")
+
+        when (val responseCode = responseJSON.getStringOrNull("response")) {
+          "[detail-successfully-disabled]" -> RecurringDropInServiceResult.PaymentMethodRemoved(id)
+          else -> RecurringDropInServiceResult.Error(reason = responseCode, dismissDropIn = false)
+        }
+      } else {
+        Log.e(TAG, "FAILED - ${response.message()}")
+        RecurringDropInServiceResult.Error(reason = response.message())
+      }
+    } catch (e: IOException) {
+      Log.e(TAG, "IOException", e)
+      RecurringDropInServiceResult.Error(reason = "IOException")
     }
   }
 }

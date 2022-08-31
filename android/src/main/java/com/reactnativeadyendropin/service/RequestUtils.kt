@@ -11,9 +11,9 @@ fun createPaymentRequest(
   shopperReference: String,
   amount: Amount,
   countryCode: String,
-  merchantAccount: String,
   redirectUrl: String,
   additionalData: AdditionalData,
+  merchantAccount: String? = null,
   force3DS2Challenge: Boolean = false,
   threeDSAuthenticationOnly: Boolean = false
 ): JSONObject {
@@ -37,4 +37,16 @@ fun createPaymentRequest(
   }
 
   return request
+}
+
+fun createRemoveStoredPaymentMethodRequest(
+  recurringDetailReference: String,
+  shopperReference: String,
+  merchantAccount: String? = null,
+): JSONObject {
+  return JSONObject().apply {
+    put("recurringDetailReference", recurringDetailReference)
+    put("merchantAccount", merchantAccount)
+    put("shopperReference", shopperReference)
+  }
 }

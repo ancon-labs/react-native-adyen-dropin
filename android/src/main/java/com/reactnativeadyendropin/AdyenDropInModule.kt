@@ -116,8 +116,21 @@ class AdyenDropInModule(private val reactContext : ReactApplicationContext): Rea
 
         if (config.hasKey("endpoints")) {
           val endpoints = config.getMap("endpoints")!!
-          memoryStorage.makePaymentEndpoint = endpoints.getString("makePayment")!!
-          memoryStorage.makeDetailsCallEndpoint = endpoints.getString("makeDetailsCall")!!
+
+          val makePaymentEndpoint = endpoints.getString("makePayment")
+          if (makePaymentEndpoint != null) {
+            memoryStorage.makePaymentEndpoint = makePaymentEndpoint
+          }
+
+          val makeDetailsCallEndpoint = endpoints.getString("makeDetailsCall")
+          if (makeDetailsCallEndpoint != null) {
+            memoryStorage.makeDetailsCallEndpoint = makeDetailsCallEndpoint
+          }
+
+          val disableStoredPaymentMethodEndpoint = endpoints.getString("disableStoredPaymentMethod")
+          if (disableStoredPaymentMethodEndpoint != null) {
+            memoryStorage.disableStoredPaymentMethodEndpoint = disableStoredPaymentMethodEndpoint
+          }
         }
       } catch (err: Error) {
         Log.d(TAG, "Error in setModuleConfig - ${err.message}")

@@ -70,6 +70,7 @@ class ConfigurationParser(private val clientKey: String, context: ReactApplicati
     val environment = this.getEnvironment(config)
     val amount = this.getAmount(config)
     val shopperReference = this.getShopperReference(config)
+    val showRemovePaymentMethodButton = this.getBoolean(config, "showRemovePaymentMethodButton")
 
     val cardConfiguration = CardConfiguration.Builder(shopperLocale, environment, this.clientKey)
       .setShopperReference(shopperReference)
@@ -91,6 +92,7 @@ class ConfigurationParser(private val clientKey: String, context: ReactApplicati
       .setEnvironment(environment)
       .setAmount(amount)
       .addCardConfiguration(cardConfiguration.build())
+      .setEnableRemovingStoredPaymentMethods(showRemovePaymentMethodButton)
 
     return builder.build()
   }
