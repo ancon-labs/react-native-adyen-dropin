@@ -29,7 +29,7 @@ buildscript {
     minSdkVersion               = 21
     compileSdkVersion           = 30
     targetSdkVersion            = 30
-+    kotlinVersion               = "1.5.31"
++   kotlinVersion               = "1.5.31"
   }
 ```
 
@@ -41,7 +41,7 @@ dependencies {
   //noinspection GradleDynamicVersion
   implementation("com.facebook.react:react-native:+")
 
-+  implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
++ implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
 }
 ```
 
@@ -79,7 +79,7 @@ public void onCreate() {
   super.onCreate();
   SoLoader.init(this, /* native exopackage */ false);
   initializeFlipper(this, getReactNativeHost().getReactInstanceManager());
-+  setup(this);
++ setup(this);
 }
 ```
 
@@ -155,6 +155,10 @@ async function handlePress() {
           merchantId: config.applePay?.configuration?.merchantId,
         },
       },
+      // Optional
+      showRemovePaymentMethodButton: config.showRemovePaymentMethodButton,
+      // Optional, required for recurring payments/saved payment method
+      shopperReference: config.shopperReference,
     });
 
     // Fetch payment methods
