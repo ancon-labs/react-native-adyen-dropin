@@ -1,3 +1,5 @@
+# [DEPRECATED] Use Adyen's official React Native implementation instead! https://github.com/Adyen/adyen-react-native
+
 <a href="https://app.circleci.com/pipelines/github/ancon-labs/react-native-adyen-dropin">
   <img src="https://img.shields.io/circleci/build/github/ancon-labs/react-native-adyen-dropin">
 </a>
